@@ -1,9 +1,8 @@
-from src.dynamics import dynamics, U
 import time
 import numpy as np
 
 
-def simulate(config):
+def simulate(config, dynamics, U):
 
     x_t = config.x0
     X = np.zeros(shape=(config.n_simulation, 2))
