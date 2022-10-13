@@ -29,15 +29,16 @@ class Trainer:
         config.kd_bo = k[0]
         config.kp_bo = k[1]
         X_bo = simulate(config, dynamics_real, U_bo)
-        norm = np.linalg.norm(self.X_star - X_bo, ord="fro")
-        if norm > 100:
-            norm = 100
-        # return [torch.tensor([k[0], k[1]]), norm, X_bo]
-        return [
-            torch.tensor([k[0], k[1]]),
-            (k[0] - 0.1) * (k[0] - 0.1) * (k[1] - 0.2) * (k[1] - 0.2),
-            X_bo,
-        ]
+        norm = np.sqrt(((self.X_star - X_bo) ** 2).sum().sum())
+        if norm > 1000:
+            norm = 1000
+        return [torch.tensor([k[0], k[1]]), norm, X_bo]
+        # Toy quadratic function
+        # return [
+        #     torch.tensor([k[0], k[1]]),
+        #     (k[0] - 0.1) * (k[0] - 0.1) * (k[1] - 0.2) * (k[1] - 0.2),
+        #     X_bo,
+        # ]
 
     def train(self, plotting=True):
         fig = plt.figure()
@@ -47,14 +48,14 @@ class Trainer:
 
         for i in range(self.config.n_opt_samples):
             # 1. collect Data
-            l = self.loss(k)
-            [train_x[i, :], train_y[i], _] = l
+            [x_k, y_k, X_bo] = self.loss(k)
+            [train_x[i, :], train_y[i]] = [x_k, y_k]
 
             # 2. Fit GP
             xNormalizer = Normalizer()
             yNormalizer = Normalizer()
             x_train_n = xNormalizer.fit_transform(train_x[: i + 1, :])
-            y_train_n = yNormalizer.fit_transform(train_y[: i + 1])
+            y_train_n = train_y[: i + 1]  # yNormalizer.fit_transform(train_y[: i + 1])
             likelihood = gpytorch.likelihoods.GaussianLikelihood()
             likelihood.noise = 1e-4
             likelihood.noise_covar.raw_noise.requires_grad_(False)
@@ -74,7 +75,8 @@ class Trainer:
             #  4.Min
             gpMin = GPMin(model, likelihood)
             x_min = gpMin.optimize(self.config.n_opt_iterations)
-            [x_min, y_min, X_bo] = self.loss(x_min)
+            [x_min, y_min, X_min] = self.loss(x_min)
+            print(xNormalizer.itransform(x_min))
 
             if plotting:
                 self.plotter.plot(
@@ -86,6 +88,7 @@ class Trainer:
                     i,
                     self.X_star,
                     X_bo,
+                    X_min,
                     self.config,
                     xNormalizer,
                     yNormalizer,

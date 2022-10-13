@@ -1,8 +1,8 @@
 class Normalizer:
-    def fit_transform(self, data):
+    def fit_transform(self, data, dim=0):
         if data.shape[0] > 1:
-            self.mean = data.mean().detach().numpy()
-            self.std = data.std().detach().numpy()
+            self.mean = data.mean(dim=dim).detach().numpy()
+            self.std = data.std(dim=dim).detach().numpy()
         else:
             self.mean = data[0].detach().numpy()
             self.std = 1
