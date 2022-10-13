@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from src.integrator import integrate
 
 # c = config
 def U_star(x, c):
@@ -12,14 +13,14 @@ def U_star(x, c):
 
 
 def U_bo(x, c):
-    return U_star(x, c) - c.k_p_bo * (x[:, 0] - c.pi) - c.k_d_bo * x[:, 1]
+    return U_star(x, c) - c.kp_bo * (x[:, 0] - c.pi) - c.kd_bo * x[:, 1]
 
 
-def dynamics_ideal(x, U, c, dt=1e-3):
-    df = np.array([x[:, 1], c.g / c.l * np.sin(x[:, 0]) + U / (c.m * c.l * c.l)]).T
-    return x + dt * df
+def dynamics_ideal(x, U, c):
+    x_dot = np.array([x[:, 1], c.g / c.l * np.sin(x[:, 0]) + U / (c.m * c.l * c.l)]).T
+    return integrate(x, x_dot, c.dt)
 
 
-def dynamics_real(x, U, c, dt=1e-3):
-    U_pert = U + c.k_p * (x[:, 0] - c.pi) + c.k_d * x[:, 1]  # Disturbance
-    return dynamics_ideal(x, U_pert, c, dt)
+def dynamics_real(x, U, c):
+    U_pert = U + c.kp * (x[:, 0] - c.pi) + c.kd * x[:, 1]  # Disturbance
+    return dynamics_ideal(x, U_pert, c)

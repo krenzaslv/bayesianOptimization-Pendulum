@@ -1,0 +1,18 @@
+[Settings]
+kp = -10
+kd = -3
+kd_bo = 0
+kp_bo = 0
+k1 = 5
+k2 = 4
+g = 9.81
+l = 1
+m = 1
+pi = 2
+n_opt_iterations = 50
+n_opt_samples = 100
+n_simulation= 5000
+x0 = 0
+x0_dot = 0
+dt = 0.001
+seed = 42
