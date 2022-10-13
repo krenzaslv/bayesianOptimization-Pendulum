@@ -32,11 +32,12 @@ class Trainer:
         norm = np.linalg.norm(self.X_star - X_bo, ord="fro")
         if norm > 100:
             norm = 100
-        return [torch.tensor([k[0], k[1]]), norm, X_bo]
-        # return [
-        #     torch.tensor([k[0], k[1]]),
-        #     (k[0] - 0.1) * (k[0] - 0.1) * (k[1] - 0.2) * (k[1] - 0.2),
-        # ]
+        # return [torch.tensor([k[0], k[1]]), norm, X_bo]
+        return [
+            torch.tensor([k[0], k[1]]),
+            (k[0] - 0.1) * (k[0] - 0.1) * (k[1] - 0.2) * (k[1] - 0.2),
+            X_bo,
+        ]
 
     def train(self, plotting=True):
         fig = plt.figure()
@@ -54,9 +55,9 @@ class Trainer:
             yNormalizer = Normalizer()
             x_train_n = xNormalizer.fit_transform(train_x[: i + 1, :])
             y_train_n = yNormalizer.fit_transform(train_y[: i + 1])
-            likelihood = gpytorch.likelihoods.GaussianLikelihood(
-                gpytorch.priors.NormalPrior(0, 1e-10)
-            )
+            likelihood = gpytorch.likelihoods.GaussianLikelihood()
+            likelihood.noise = 1e-4
+            likelihood.noise_covar.raw_noise.requires_grad_(False)
             model = ExactGPModel(x_train_n, y_train_n, likelihood)
 
             gpOptimizer = GPOptimizer(model, likelihood)

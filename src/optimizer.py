@@ -64,7 +64,7 @@ class GPMin:
         self.model.eval()
         self.likelihood.eval()
 
-        t = Variable(rand_torch(-1, 1, 2, 200), requires_grad=True)
+        t = Variable(rand_torch(-1, 1, 2, 10), requires_grad=True)
         # t = Variable(torch.tensor([[0.0, 0.0]]), requires_grad=True)
         optimizer = torch.optim.Adam([t], lr=0.1)
 

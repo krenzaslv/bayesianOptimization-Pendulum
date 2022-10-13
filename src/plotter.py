@@ -43,7 +43,7 @@ class Plotter:
 
         out = model(inp)
         var = out.variance.detach().numpy()
-        mean = yNormalizer.itransform(out.mean.detach().numpy())
+        mean = out.mean.detach().numpy()
 
         inp = xNormalizer.itransform(inp)
 
@@ -58,10 +58,15 @@ class Plotter:
         self.ax.scatter(
             train_x[: i + 1, 0],
             train_x[: i + 1, 1],
-            train_y[: i + 1],
+            yNormalizer.transform(train_y[: i + 1]),
             **{"color": "red", "marker": "o"}
         )
-        self.ax.plot(x_min[0], x_min[1], y_min, **{"color": "black", "marker": "X"})
+        self.ax.plot(
+            x_min[0],
+            x_min[1],
+            yNormalizer.transform(y_min),
+            **{"color": "black", "marker": "X"}
+        )
 
         if y_min < 100:
             self.X_bo_buffer.append(X_bo)
