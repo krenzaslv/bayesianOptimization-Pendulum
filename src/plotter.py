@@ -5,6 +5,7 @@ import copy
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import cm
 
 
 class Plotter:
@@ -27,21 +28,31 @@ class Plotter:
         X_star,
         X_bo,
         config,
-        start=-20,
-        end=20,
+        xNormalizer,
+        yNormalizer,
         n_samples=100,
     ):
         self.ax.clear()
         self.ax2.clear()
         self.ax3.clear()
-        x = torch.linspace(start, end, n_samples)
+
+        x = torch.linspace(-3, 3, n_samples)
         x, y = torch.meshgrid(x, x, indexing="xy")
+
         inp = torch.stack((x, y), dim=2).float()
 
         out = model(inp)
+        var = out.variance.detach().numpy()
+        mean = yNormalizer.itransform(out.mean.detach().numpy())
+
+        inp = xNormalizer.itransform(inp)
 
         self.ax.plot_surface(
-            x, y, out.mean.detach().numpy(), **{"color": "lightsteelblue", "alpha": 0.5}
+            inp[:, :, 0],
+            inp[:, :, 1],
+            mean,
+            alpha=0.5,
+            facecolors=cm.jet(var / np.amax(var)),
         )
 
         self.ax.scatter(
@@ -52,7 +63,7 @@ class Plotter:
         )
         self.ax.plot(x_min[0], x_min[1], y_min, **{"color": "black", "marker": "X"})
 
-        if ~(i % 5):
+        if y_min < 100:
             self.X_bo_buffer.append(X_bo)
 
         for bo in self.X_bo_buffer:

@@ -3,6 +3,7 @@ import gpytorch
 from torch.autograd import Variable
 import numpy as np
 from src.random import rand, rand_torch
+from matplotlib import cm
 
 
 class GPOptimizer:
@@ -16,26 +17,13 @@ class GPOptimizer:
 
         optimizer = torch.optim.Adam(self.model.parameters(), lr=0.1)
 
-        # "Loss" for GPs - the marginal log likelihood
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self.model)
 
         for i in range(training_steps):
-            # Zero gradients from previous iteration
             optimizer.zero_grad()
-            # Output from model
             output = self.model(train_x)
-            # Calc loss and backprop gradients
             loss = -mll(output, train_y)
             loss.backward()
-            optimizer.step()
-        # print(
-        #     "loss: %.3f   lengthscale: %.3f   noise: %.3f"
-        #     % (
-        #         loss.item(),
-        #         self.model.covar_module.base_kernel.lengthscale.item(),
-        #         self.model.likelihood.noise.item(),
-        #     )
-        # )
 
 
 class UCBAquisition:
@@ -76,18 +64,18 @@ class GPMin:
         self.model.eval()
         self.likelihood.eval()
 
-        # TODO mutliple starting points
-        x = Variable(rand_torch(-20, 20, 2, 1), requires_grad=True)
-        # x = Variable(torch.tensor([[0, 0]]), requires_grad=True)
-        optimizer = torch.optim.Adam([x], lr=0.01)
-
-        # "Loss" for GPs - the marginal log likelihood
+        t = Variable(rand_torch(-1, 1, 2, 200), requires_grad=True)
+        # t = Variable(torch.tensor([[0.0, 0.0]]), requires_grad=True)
+        optimizer = torch.optim.Adam([t], lr=0.1)
 
         for i in range(training_steps):
             optimizer.zero_grad()
-            output = self.model(x)
-            loss = torch.sum(self.model(x).mean - self.model(x).variance)
+            output = self.model(t)
+            loss = torch.sum((self.model(t).mean + self.model(t).variance) ** 2)
             loss.backward()
             optimizer.step()
 
-        return x[0].detach().numpy()
+        loss = (self.model(t).mean + self.model(t).variance) ** 2
+        minIdx = torch.argmin(loss)
+
+        return t[minIdx].detach().numpy()
