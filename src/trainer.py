@@ -8,7 +8,7 @@ from src.GPModel import ExactGPModel
 from src.normalizer import Normalizer
 from src.simulator import simulate
 from src.dynamics import U_bo, dynamics_real
-from src.optimizer import GPOptimizer, UCBAquisition, GPMin
+from src.optimizer import GPOptimizer, UCBAquisition
 from src.plotter import Plotter
 import torch
 from gpytorch.mlls import ExactMarginalLogLikelihood
@@ -72,23 +72,14 @@ class Trainer:
             ucbAquisition = UCBAquisition(model, likelihood)
             k = ucbAquisition.optimize(self.config.n_opt_iterations)[0]
 
-            #  4.Min
-            gpMin = GPMin(model, likelihood)
-            x_min = gpMin.optimize(self.config.n_opt_iterations)
-            [x_min, y_min, X_min] = self.loss(x_min)
-            print(xNormalizer.itransform(x_min))
-
             if plotting:
                 self.plotter.plot(
                     model,
                     train_x,
                     train_y,
-                    xNormalizer.itransform(x_min),
-                    y_min,
                     i,
                     self.X_star,
                     X_bo,
-                    X_min,
                     self.config,
                     xNormalizer,
                     yNormalizer,

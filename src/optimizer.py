@@ -53,30 +53,3 @@ class UCBAquisition:
 
         # return x.detach().numpy()
         return rand(-15, 15, 2)
-
-
-class GPMin:
-    def __init__(self, model, likelihood):
-        self.model = model
-        self.likelihood = likelihood
-
-    def optimize(self, training_steps, n_restarts=5):
-        self.model.eval()
-        self.likelihood.eval()
-
-        t = Variable(rand_torch(-2, 2, 2, 20), requires_grad=True)
-        # t = Variable(torch.tensor([[0.0, 0.0]]), requires_grad=True)
-        optimizer = torch.optim.Adam([t], lr=0.1)
-
-        for i in range(training_steps):
-            optimizer.zero_grad()
-            output = self.model(t)
-            loss = torch.sum(self.model(t).mean)  # + self.model(t).variance
-            loss.backward()
-            optimizer.step()
-
-        loss = self.model(t).mean  # + self.model(t).variance) ** 2
-
-        minIdx = torch.argmin(loss)
-
-        return t[minIdx].detach().numpy()
