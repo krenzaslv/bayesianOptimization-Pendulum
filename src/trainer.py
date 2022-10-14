@@ -26,12 +26,12 @@ class Trainer:
 
     def loss(self, k):
         config = copy.copy(self.config)
-        config.kd_bo = k[0]
-        config.kp_bo = k[1]
+        config.kp_bo = k[0]
+        config.kd_bo = k[1]
         X_bo = simulate(config, dynamics_real, U_bo)
         norm = np.sqrt(((self.X_star - X_bo) ** 2).sum().sum())
-        if norm > 1000:
-            norm = 1000
+        if norm > 20:
+            norm = 20
         return [torch.tensor([k[0], k[1]]), norm, X_bo]
         # Toy quadratic function
         # return [
@@ -55,22 +55,34 @@ class Trainer:
             xNormalizer = Normalizer()
             yNormalizer = Normalizer()
             x_train_n = xNormalizer.fit_transform(train_x[: i + 1, :])
-            y_train_n = train_y[: i + 1]  # yNormalizer.fit_transform(train_y[: i + 1])
-            likelihood = gpytorch.likelihoods.GaussianLikelihood()
+            y_train_n = yNormalizer.fit_transform(train_y[: i + 1])
+            likelihood = gpytorch.likelihoods.GaussianLikelihood(
+                noise_constraint=gpytorch.constraints.GreaterThan(1e-4)
+            )
             likelihood.noise = 1e-4
-            likelihood.noise_covar.raw_noise.requires_grad_(False)
+            # likelihood.noise_covar.raw_noise.requires_grad_(False)
             model = ExactGPModel(x_train_n, y_train_n, likelihood)
 
-            gpOptimizer = GPOptimizer(model, likelihood)
+            gpOptimizer = GPOptimizer(model, likelihood, self.config.lr)
             gpOptimizer.optimize(
                 x_train_n,
                 y_train_n,
                 self.config.n_opt_iterations,
             )
 
-            # # 3. Find next x with UCB
-            ucbAquisition = UCBAquisition(model, likelihood)
-            k = ucbAquisition.optimize(self.config.n_opt_iterations)[0]
+            # 3. Find next x with UCB
+            ucbAquisition = UCBAquisition(
+                model, likelihood, xNormalizer, self.config.beta, self.config.lr
+            )
+            k = ucbAquisition.optimize(self.config.n_opt_iterations)
+            k = xNormalizer.itransform(k)
+
+            # 4. Find GP Min
+            # gpMin = GPMin(model, likelihood, xNormalizer, 0.1)  # self.config.lr)
+            # x_min = xNormalizer.itransform(
+            #     gpMin.optimize(100)
+            # )  # self.config.n_opt_iterations))
+            # print(x_min)
 
             if plotting:
                 self.plotter.plot(
@@ -80,7 +92,9 @@ class Trainer:
                     i,
                     self.X_star,
                     X_bo,
+                    # x_min,
                     self.config,
                     xNormalizer,
                     yNormalizer,
+                    self.config,
                 )
