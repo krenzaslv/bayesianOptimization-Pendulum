@@ -143,8 +143,8 @@ class Plotter:
         self.ax3.set_xlabel("t")
 
         self.ax4.set_title(
-            r"k_star =  [{} {} and k_hat = [{} {}]]".format(
-                c.kp, c.kd, x_min[0], x_min[1]
+            r"k_star =  [{} {} and k_hat = [{} {}]], error: {}".format(
+                c.kp, c.kd, x_min[0], x_min[1], y_min
             )
         )
         self.ax4.set_ylabel("error")
