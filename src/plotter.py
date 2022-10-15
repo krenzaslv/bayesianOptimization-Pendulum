@@ -16,6 +16,7 @@ class Plotter:
         sns.set_theme()
         grid = self.fig.add_gridspec(3, 2)
         self.ax = self.fig.add_subplot(grid[:, 0], projection="3d")
+        self.ax.set_zscale("log")
         self.ax2 = self.fig.add_subplot(grid[0, 1])
         self.ax3 = self.fig.add_subplot(grid[1, 1])
         self.ax4 = self.fig.add_subplot(grid[2, 1])
@@ -45,7 +46,7 @@ class Plotter:
         self.ax4.clear()
         self.ax.set_ylim(-30, 30)
         self.ax.set_xlim(-30, 30)
-        self.ax.set_zlim(-1, 30)
+        # self.ax.set_zlim(-1, 30)
         self.ax2.set_ylim(-2, 4)
         self.ax3.set_ylim(-4, 4)
 
@@ -118,12 +119,11 @@ class Plotter:
             markersize=20,
         )
 
-        if train_y[i] < 1000:
-            self.X_bo_buffer.append(X_bo)
-            miny = torch.min(train_y[: i + 1])
-            if i == 0 or self.miny > miny:
-                self.X_min = X_bo
-                self.miny = miny
+        self.X_bo_buffer.append(X_bo)
+        miny = torch.min(train_y[: i + 1])
+        if i == 0 or self.miny > miny:
+            self.X_min = X_bo
+            self.miny = miny
 
         for bo in self.X_bo_buffer:
             self.ax2.plot(bo[:, 0], color="blue", alpha=0.1)

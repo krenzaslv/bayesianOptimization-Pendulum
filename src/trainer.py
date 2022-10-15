@@ -30,8 +30,6 @@ class Trainer:
         config.kd_bo = k[1]
         X_bo = simulate(config, dynamics_real, U_bo)
         norm = np.sqrt(((self.X_star - X_bo) ** 2).sum().sum())
-        if norm > 20:
-            norm = 20
         return [torch.tensor([k[0], k[1]]), norm, X_bo]
         # Toy quadratic function
         # return [
@@ -76,13 +74,6 @@ class Trainer:
             )
             k = ucbAquisition.optimize(self.config.n_opt_iterations)
             k = xNormalizer.itransform(k)
-
-            # 4. Find GP Min
-            # gpMin = GPMin(model, likelihood, xNormalizer, 0.1)  # self.config.lr)
-            # x_min = xNormalizer.itransform(
-            #     gpMin.optimize(100)
-            # )  # self.config.n_opt_iterations))
-            # print(x_min)
 
             if plotting:
                 self.plotter.plot(

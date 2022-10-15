@@ -18,13 +18,14 @@ class Config:
         self.g = self.getFloat("g")
         self.dt = self.getFloat("dt")
         self.lr = self.getFloat("lr")
+        self.max_torque = self.getFloat("max_torque")
         self.epsilon = self.getFloat("epsilon")
         self.beta = self.getFloat("beta")
         self.n_opt_iterations = self.getInt("n_opt_iterations")
         self.n_opt_samples = self.getInt("n_opt_samples")
         self.seed = self.getInt("seed")
         self.n_simulation = self.getInt("n_simulation")
-        self.x0 = np.array([[self.getFloat("x0"), self.getFloat("x0_dot")]])
+        self.x0 = np.array([self.getFloat("x0"), self.getFloat("x0_dot")])
 
     def getFloat(self, key):
         return self.config.getfloat("Settings", key)
