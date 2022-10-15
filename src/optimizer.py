@@ -38,6 +38,7 @@ class UCBAquisition:
     def ucb_loss(self, x):
         return x.mean - torch.sqrt(self.beta) * x.variance
         # return -torch.sqrt(self.beta) * x.variance
+        # return -torch.sqrt(self.beta) * x.variance
 
     def optimize(self, training_steps):
         self.model.eval()

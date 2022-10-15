@@ -10,6 +10,7 @@ from src.simulator import simulate
 from src.dynamics import U_bo, dynamics_real
 from src.optimizer import GPOptimizer, UCBAquisition
 from src.plotter import Plotter
+from src.tools import X_toRad
 import torch
 from gpytorch.mlls import ExactMarginalLogLikelihood
 import gpytorch
@@ -30,6 +31,8 @@ class Trainer:
         config.kd_bo = k[1]
         X_bo = simulate(config, dynamics_real, U_bo)
         norm = np.sqrt(((self.X_star - X_bo) ** 2).sum().sum())
+        # if norm > 20:
+        #     norm = 20
         return [torch.tensor([k[0], k[1]]), norm, X_bo]
         # Toy quadratic function
         # return [
