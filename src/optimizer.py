@@ -4,6 +4,7 @@ from torch.autograd import Variable
 import numpy as np
 from src.random import rand, rand_torch
 from matplotlib import cm
+import math
 
 
 class GPOptimizer:
@@ -17,7 +18,7 @@ class GPOptimizer:
         self.likelihood.train()
 
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
-
+        scheduler1 = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.8)
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self.model)
 
         for i in range(training_steps):
@@ -25,18 +26,27 @@ class GPOptimizer:
             output = self.model(train_x)
             loss = -mll(output, train_y)
             loss.backward()
+            optimizer.step()
+            # print("Iter %d/%d - Loss: %.3f" % (i + 1, i, loss.item()))
+
+        # print("GP Loss: {}".format(loss))
 
 
 class UCBAquisition:
-    def __init__(self, model, likelihood, xNormalizer, beta=100, lr=0.1):
+    def __init__(self, model, likelihood, xNormalizer, t, c):
         self.model = model
         self.likelihood = likelihood
-        self.beta = torch.tensor([beta])
         self.xNormalizer = xNormalizer
-        self.lr = lr
+        self.t = t + 1
+        self.c = c
 
     def ucb_loss(self, x):
-        return x.mean - torch.sqrt(self.beta) * x.variance
+        D = self.c.domain_end - self.c.domain_start
+        D = D * D
+        beta_t = (
+            2 * np.log(D * self.t * self.t * math.pi * math.pi / (6 * self.c.gamma)) / 5
+        )
+        return x.mean - np.sqrt(beta_t) * x.variance
         # return -torch.sqrt(self.beta) * x.variance
         # return -torch.sqrt(self.beta) * x.variance
 
@@ -45,10 +55,14 @@ class UCBAquisition:
         self.likelihood.eval()
 
         t = Variable(
-            self.xNormalizer.transform(rand_torch(-30, 30, 2, 200)), requires_grad=True
+            self.xNormalizer.transform(
+                rand_torch(self.c.domain_start, self.c.domain_end, 2, 1000)
+            ),
+            requires_grad=True,
         )
-        # t = Variable(torch.tensor([[0.0, 0.0]]), requires_grad=True)
-        optimizer = torch.optim.Adam([t], lr=self.lr)
+        # optimizer = torch.optim.Adam([t], lr=self.c.lr_aq)
+        optimizer = torch.optim.SGD([t], self.c.lr_aq)
+        scheduler1 = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.8)
 
         for i in range(training_steps):
             optimizer.zero_grad()
@@ -59,12 +73,12 @@ class UCBAquisition:
 
             with torch.no_grad():
                 t = self.xNormalizer.itransform(t)
-                t[:] = t.clamp(-30, +30)
+                t[:] = t.clamp(self.c.domain_start, self.c.domain_end)
                 t = self.xNormalizer.transform(t)
 
         loss = self.ucb_loss(self.model(t))
 
         minIdx = torch.argmin(loss)
-
+        # print("UCB Loss: {}".format(loss[minIdx]))
         return t[minIdx].detach().numpy()
         # return rand(-15, 15, 2)

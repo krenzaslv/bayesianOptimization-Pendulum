@@ -29,7 +29,7 @@ def dynamics_ideal(x, U, c):
         [t[1], c.g / c.l * np.sin(t[0]) + U(x, c) / (c.m * c.l * c.l)]
     ).T
     res = integrate(x, f, c.dt)
-    # res[0] = rad(res[0])
+    res[0] = rad(res[0])
     return res
 
 

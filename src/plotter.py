@@ -35,23 +35,22 @@ class Plotter:
         xNormalizer,
         yNormalizer,
         c,
-        n_samples=200,
+        n_samples=50,
     ):
         plt.rc("font", family="serif")
         model.eval()
         self.ax.clear()
-        self.ax.set_zscale("log")
         self.ax2.clear()
         self.ax3.clear()
         self.ax4.clear()
-        self.ax.set_ylim(-30, 30)
-        self.ax.set_xlim(-30, 30)
+        self.ax.set_ylim(c.domain_start, c.domain_end)
+        self.ax.set_xlim(c.domain_start, c.domain_end)
         # self.ax.set_zlim(-1, 30)
         self.ax2.set_ylim(-2, 4)
         self.ax3.set_ylim(-4, 4)
 
         # x = xNormalizer.transform(torch.linspace(-20, 20, n_samples))
-        grid = torch.linspace(-30, 30, n_samples)
+        grid = torch.linspace(c.domain_start, c.domain_end, n_samples)
         grid_x, grid_y = torch.meshgrid(grid, grid, indexing="xy")
         inp = torch.stack((grid_x, grid_y), dim=2).float()
         with torch.autograd.no_grad():
@@ -81,6 +80,7 @@ class Plotter:
             train_x[:i, 0],
             train_x[:i, 1],
             train_y[:i],  # yNormalizer.transform(train_y[: i + 1]),
+            # s=300,
             color="red",
             marker="o",
         )
@@ -97,7 +97,7 @@ class Plotter:
         self.ax.plot(
             c.kp,
             c.kd,
-            0,  # yNormalizer.transform(train_y[: i + 1]),
+            0,
             color="blue",
             marker="X",
             markersize=20,

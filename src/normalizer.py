@@ -10,6 +10,8 @@ class Normalizer:
 
     def transform(self, data):
         return (data - self.mean) / self.std
+        # return data
 
     def itransform(self, data):
         return data * self.std + self.mean
+        # return data
