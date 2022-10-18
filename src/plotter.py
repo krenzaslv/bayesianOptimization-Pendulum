@@ -46,7 +46,7 @@ class Plotter:
         self.ax.set_ylim(c.domain_start, c.domain_end)
         self.ax.set_xlim(c.domain_start, c.domain_end)
         # self.ax.set_zlim(-1, 30)
-        self.ax2.set_ylim(-2, 4)
+        self.ax2.set_ylim(-4, 4)
         self.ax3.set_ylim(-4, 4)
 
         # x = xNormalizer.transform(torch.linspace(-20, 20, n_samples))
@@ -91,7 +91,7 @@ class Plotter:
             train_y[i],  # yNormalizer.transform(train_y[: i + 1]),
             color="red",
             marker="X",
-            markersize=20,
+            markersize=40,
         )
 
         self.ax.plot(

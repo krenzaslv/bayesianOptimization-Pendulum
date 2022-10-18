@@ -18,6 +18,7 @@ class Config:
         self.g = self.getFloat("g")
         self.dt = self.getFloat("dt")
         self.lr_gp = self.getFloat("lr_gp")
+        self.n_evaluate = self.getInt("n_evaluate")
         self.lr_aq = self.getFloat("lr_aq")
         self.domain_start = self.getFloat("domain_start")
         self.domain_end = self.getFloat("domain_end")

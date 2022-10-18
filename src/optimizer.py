@@ -43,8 +43,8 @@ class UCBAquisition:
     def ucb_loss(self, x):
         D = self.c.domain_end - self.c.domain_start
         D = D * D
-        beta_t = (
-            2 * np.log(D * self.t * self.t * math.pi * math.pi / (6 * self.c.gamma)) / 5
+        beta_t = 2 * np.log(
+            D * self.t * self.t * math.pi * math.pi / (6 * self.c.gamma)
         )
         return x.mean - np.sqrt(beta_t) * x.variance
         # return -torch.sqrt(self.beta) * x.variance
