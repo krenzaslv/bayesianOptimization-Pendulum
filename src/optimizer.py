@@ -18,7 +18,7 @@ class GPOptimizer:
         self.likelihood.train()
 
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
-        scheduler1 = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.85)
+        scheduler1 = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self.model)
 
         for i in range(training_steps):
@@ -41,9 +41,10 @@ class UCBAquisition:
         D = (self.c.domain_end_p - self.c.domain_start_p) * (
             self.c.domain_end_d - self.c.domain_start_d
         )
-        beta_t = (
-            2 * np.log(D * self.t * self.t * math.pi * math.pi / (6 * self.c.gamma)) / 5
+        beta_t = 2 * np.log(
+            D * self.t * self.t * math.pi * math.pi / (6 * self.c.gamma) / 5
         )
+        # beta_t = 1.96
         return x.mean - np.sqrt(beta_t) * x.variance
         # return -torch.sqrt(self.beta) * x.variance
         # return -torch.sqrt(self.beta) * x.variance
@@ -57,7 +58,7 @@ class UCBAquisition:
             self.c.domain_end_p,
             self.c.domain_start_d,
             self.c.domain_end_d,
-            500,
+            100,
         )
         t = Variable(
             self.xNormalizer.transform(randInit),
@@ -65,7 +66,7 @@ class UCBAquisition:
         )
 
         optimizer = torch.optim.SGD([t], self.c.lr_aq)
-        scheduler1 = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.85)
+        scheduler1 = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
         for i in range(training_steps):
             optimizer.zero_grad()
