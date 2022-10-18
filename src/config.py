@@ -32,6 +32,7 @@ class Config:
         self.n_opt_iterations_aq = self.getInt("n_opt_iterations_aq")
         self.n_opt_samples = self.getInt("n_opt_samples")
         self.seed = self.getInt("seed")
+        self.save_file = self.getString("save_file")
         self.n_simulation = self.getInt("n_simulation")
         self.plotting = self.getBool("plotting")
         self.x0 = np.array([self.getFloat("x0"), self.getFloat("x0_dot")])
@@ -44,3 +45,6 @@ class Config:
 
     def getInt(self, key):
         return self.config.getint("Settings", key)
+
+    def getString(self, key):
+        return self.config.get("Settings", key)

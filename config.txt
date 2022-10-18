@@ -27,5 +27,6 @@ domain_start_p=0
 domain_end_p=5
 domain_start_d=-2
 domain_end_d=2
-plotting=True
+plotting=False
 plotting_n_samples=200
+save_file = data.txt

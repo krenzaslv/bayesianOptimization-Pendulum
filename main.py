@@ -7,6 +7,8 @@ from src.config import Config
 from src.plot import Plot
 import torch
 import cProfile, pstats
+from src.logger import save, load
+import matplotlib.pyplot as plt
 
 app = typer.Typer()
 
@@ -24,6 +26,20 @@ def profile(
 
 
 @app.command()
+def plot(
+    config_path: str = typer.Option("config.txt", help="Path to config file"),
+):
+    config = Config(config_path)
+    logger = load(config.save_file)
+    torch.manual_seed(config.seed)
+    np.random.seed(config.seed)
+    X_star = simulate(config, dynamics_ideal, U_star)
+    plotter = Plot(X_star, config)
+    plotter.plot(logger)
+    plt.show()
+
+
+@app.command()
 def train(
     config_path: str = typer.Option("config.txt", help="Path to config file"),
 ):
@@ -34,6 +50,7 @@ def train(
     X_star = simulate(config, dynamics_ideal, U_star)
     trainer = Trainer(config, X_star)
     trainer.train()
+    save(trainer.logger, config.save_file)
 
     if config.plotting:
         plotter = Plot(X_star, config)

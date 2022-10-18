@@ -8,6 +8,7 @@ import numpy as np
 import seaborn as sns
 from matplotlib import cm
 from matplotlib.animation import FuncAnimation
+import pickle
 
 
 class Plot:
@@ -124,14 +125,18 @@ class Plot:
     ):
         N = len(logger.X_buffer)
 
-        self.ax2.plot(self.X_star[:, 0], color="red")
-        self.ax2.plot(self.config.pi * np.ones(self.X_star.shape[0]), color="red")
-        self.ax3.plot(self.config.pi * np.ones(self.X_star.shape[0]), color="red")
-
         for i in range(N):
             self.clearSurface()
 
-            [model, X_k, x, y, xNormalizer, yNormalizer] = logger.getDataFromEpoch(i)
+            [
+                model,
+                X,
+                x,
+                y,
+                xNormalizer,
+                yNormalizer,
+                y_min_buffer,
+            ] = logger.getDataFromEpoch(i)
 
             inp = self.createGrid()
             with torch.autograd.no_grad():
@@ -148,11 +153,13 @@ class Plot:
                 i, inp, mean, var, x, y, x_min, y_min, xNormalizer, yNormalizer, model
             )
 
-            self.ax2.plot(X_k[:, 0], color="blue", alpha=0.1)
+            for X_k in X:
+                self.ax2.plot(X_k[:, 0], color="blue", alpha=0.1)
             self.ax2.plot(logger.X_buffer[0][:, 0], color="orange")
             self.ax2.plot(logger.X_buffer[minIdx][:, 0], color="green")
 
-            self.ax3.plot(X_k[:, 1], color="blue", alpha=0.1)
+            for X_k in X:
+                self.ax3.plot(X_k[:, 1], color="blue", alpha=0.1)
             self.ax3.plot(logger.X_buffer[0][:, 1], color="orange")
             self.ax3.plot(logger.X_buffer[minIdx][:, 1], color="green")
 
@@ -161,8 +168,10 @@ class Plot:
                     self.config.kp, self.config.kd, x_min[0], x_min[1], y_min
                 )
             )
-            # self.ax4.plot(self.y_min_buffer[: i + 1])
-            self.ax4.plot(i, y_min)
+            self.ax4.plot(y_min_buffer)
 
-            # self.fig.show()
+            self.ax2.plot(self.X_star[:, 0], color="red")
+            self.ax2.plot(self.config.pi * np.ones(self.X_star.shape[0]), color="red")
+            self.ax3.plot(self.config.pi * np.ones(self.X_star.shape[0]), color="red")
+
             plt.pause(1)
