@@ -77,12 +77,10 @@ class UCBAquisition:
             # Filter out results that are not in the domain
             with torch.no_grad():
                 t = self.xNormalizer.itransform(t)
-                t = t[
-                    t[:, 0] > self.c.domain_start_p
-                ]  # and t[:, 0] > self.c.domain_end_p]
-                t = t[
-                    t[:, 1] > self.c.domain_start_d
-                ]  # and t[:, 1] > self.c.domain_end_d]
+                t[t[:, 0] < self.c.domain_start_p] = self.c.domain_start_p
+                t[t[:, 0] > self.c.domain_end_p] = self.c.domain_end_p
+                t[t[:, 1] < self.c.domain_start_d] = self.c.domain_start_d
+                t[t[:, 1] > self.c.domain_end_d] = self.c.domain_end_d
                 t = self.xNormalizer.transform(t)
 
         loss = self.ucb_loss(self.model(t))

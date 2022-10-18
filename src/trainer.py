@@ -17,7 +17,6 @@ import copy
 import math
 import matplotlib.pyplot as plt
 from src.tools import clamp
-from rich.progress import track
 import threading
 
 
@@ -33,7 +32,7 @@ class Trainer:
         config.kd_bo = k[1]
         X_bo = simulate(config, dynamics_real, U_bo)
         stepsize = math.floor(X_bo.shape[0] / self.config.n_evaluate)
-        norm = np.linalg.norm(self.X_star[::stepsize] - X_bo[::stepsize])
+        norm = clamp(np.linalg.norm(self.X_star[::stepsize] - X_bo[::stepsize]), 10)
         # norm = np.linalg.norm(self.X_star[::stepsize] - X_bo[::stepsize])
 
         return [torch.tensor([k[0], k[1]]), norm, X_bo]

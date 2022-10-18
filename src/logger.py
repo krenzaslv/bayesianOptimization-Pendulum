@@ -22,7 +22,6 @@ class Logger:
         self.xNormalizer_buffer.append(xNormalizer)
         self.yNormalizer_buffer.append(yNormalizer)
         minIdx = np.argmin(np.array(self.y_k_buffer))
-        print(minIdx)
         self.y_min_buffer.append(self.y_k_buffer[minIdx])
 
     def getDataFromEpoch(self, i):

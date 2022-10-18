@@ -9,6 +9,7 @@ import seaborn as sns
 from matplotlib import cm
 from matplotlib.animation import FuncAnimation
 import pickle
+from rich.progress import track
 
 
 class Plot:
@@ -28,6 +29,14 @@ class Plot:
         self.ax2 = self.fig.add_subplot(grid[0, 1])
         self.ax3 = self.fig.add_subplot(grid[1, 1])
         self.ax4 = self.fig.add_subplot(grid[2, 1])
+
+    def clearSurface(self):
+        self.ax.clear()
+        self.ax2.clear()
+        self.ax3.clear()
+        self.ax4.clear()
+        self.ax.set_ylim(self.config.domain_start_d, self.config.domain_end_d)
+        self.ax.set_xlim(self.config.domain_start_p, self.config.domain_end_p)
         self.ax.set_ylabel("kp")
         self.ax.set_xlabel("kd")
         self.ax.set_zlabel("f(x)")
@@ -41,14 +50,6 @@ class Plot:
         self.ax3.set_ylim(-4, 4)
         self.ax2.set_ylim(-4, 4)
         self.ax3.set_ylim(-4, 4)
-
-    def clearSurface(self):
-        self.ax.clear()
-        self.ax2.clear()
-        self.ax3.clear()
-        self.ax4.clear()
-        self.ax.set_ylim(self.config.domain_start_d, self.config.domain_end_d)
-        self.ax.set_xlim(self.config.domain_start_p, self.config.domain_end_p)
 
     def createGrid(self):
         grid_x = torch.linspace(
@@ -119,59 +120,70 @@ class Plot:
             markersize=20,
         )
 
+    def plotIdx(self, logger, i):
+        self.clearSurface()
+
+        [
+            model,
+            X,
+            x,
+            y,
+            xNormalizer,
+            yNormalizer,
+            y_min_buffer,
+        ] = logger.getDataFromEpoch(i)
+
+        inp = self.createGrid()
+        with torch.autograd.no_grad():
+            out = model(xNormalizer.transform(inp))
+
+        var = out.variance.detach().numpy()
+        mean = out.mean.detach().numpy()
+
+        minIdx = np.argmin(y[: i + 1])
+        x_min = x[minIdx]
+        y_min = y[minIdx]
+
+        self.plotSurface(
+            i, inp, mean, var, x, y, x_min, y_min, xNormalizer, yNormalizer, model
+        )
+
+        for X_k in X:
+            self.ax2.plot(X_k[:, 0], color="blue", alpha=0.1)
+        self.ax2.plot(logger.X_buffer[0][:, 0], color="orange", label="initial")
+        self.ax2.plot(logger.X_buffer[minIdx][:, 0], color="green", label="bestfound")
+
+        for X_k in X:
+            self.ax3.plot(X_k[:, 1], color="blue", alpha=0.1)
+        self.ax3.plot(logger.X_buffer[0][:, 1], color="orange", label="initial")
+        self.ax3.plot(logger.X_buffer[minIdx][:, 1], color="green", label="bestfound")
+
+        self.ax4.set_title(
+            r"k_star =  [{} {} and k_hat = [{} {}]], error: {}".format(
+                self.config.kp, self.config.kd, x_min[0], x_min[1], y_min
+            )
+        )
+        self.ax4.plot(y_min_buffer)
+
+        self.ax2.plot(self.X_star[:, 0], color="red")
+        self.ax2.plot(
+            self.config.pi * np.ones(self.X_star.shape[0]), color="red", label="ideal"
+        )
+        self.ax3.plot(
+            self.config.pi * np.ones(self.X_star.shape[0]), color="red", label="ideal"
+        )
+        self.ax2.legend()
+        self.ax3.legend()
+        plt.savefig("data/{}.png".format(i))
+
+        plt.pause(0.001)
+
     def plot(
         self,
         logger,
     ):
         N = len(logger.X_buffer)
+        plt.pause(3)
 
-        for i in range(N):
-            self.clearSurface()
-
-            [
-                model,
-                X,
-                x,
-                y,
-                xNormalizer,
-                yNormalizer,
-                y_min_buffer,
-            ] = logger.getDataFromEpoch(i)
-
-            inp = self.createGrid()
-            with torch.autograd.no_grad():
-                out = model(xNormalizer.transform(inp))
-
-            var = out.variance.detach().numpy()
-            mean = out.mean.detach().numpy()
-
-            minIdx = np.argmin(y[: i + 1])
-            x_min = x[minIdx]
-            y_min = y[minIdx]
-
-            self.plotSurface(
-                i, inp, mean, var, x, y, x_min, y_min, xNormalizer, yNormalizer, model
-            )
-
-            for X_k in X:
-                self.ax2.plot(X_k[:, 0], color="blue", alpha=0.1)
-            self.ax2.plot(logger.X_buffer[0][:, 0], color="orange")
-            self.ax2.plot(logger.X_buffer[minIdx][:, 0], color="green")
-
-            for X_k in X:
-                self.ax3.plot(X_k[:, 1], color="blue", alpha=0.1)
-            self.ax3.plot(logger.X_buffer[0][:, 1], color="orange")
-            self.ax3.plot(logger.X_buffer[minIdx][:, 1], color="green")
-
-            self.ax4.set_title(
-                r"k_star =  [{} {} and k_hat = [{} {}]], error: {}".format(
-                    self.config.kp, self.config.kd, x_min[0], x_min[1], y_min
-                )
-            )
-            self.ax4.plot(y_min_buffer)
-
-            self.ax2.plot(self.X_star[:, 0], color="red")
-            self.ax2.plot(self.config.pi * np.ones(self.X_star.shape[0]), color="red")
-            self.ax3.plot(self.config.pi * np.ones(self.X_star.shape[0]), color="red")
-
-            plt.pause(1)
+        for i in track(range(N), description="Generating Plot..."):
+            self.plotIdx(logger, i)

@@ -8,6 +8,7 @@ from src.plot import Plot
 import torch
 import cProfile, pstats
 from src.logger import save, load
+from src.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt
 
 app = typer.Typer()
@@ -26,9 +27,15 @@ def profile(
 
 
 @app.command()
+def make_gif():
+    makeGIF()
+
+
+@app.command()
 def plot(
     config_path: str = typer.Option("config.txt", help="Path to config file"),
 ):
+    clearFiles()
     config = Config(config_path)
     logger = load(config.save_file)
     torch.manual_seed(config.seed)
@@ -36,6 +43,22 @@ def plot(
     X_star = simulate(config, dynamics_ideal, U_star)
     plotter = Plot(X_star, config)
     plotter.plot(logger)
+    plt.show()
+
+
+@app.command()
+def plot_end(
+    config_path: str = typer.Option("config.txt", help="Path to config file"),
+):
+    clearFiles()
+    config = Config(config_path)
+    logger = load(config.save_file)
+    torch.manual_seed(config.seed)
+    np.random.seed(config.seed)
+    X_star = simulate(config, dynamics_ideal, U_star)
+    plotter = Plot(X_star, config)
+    endIdx = len(logger.X_buffer) - 1
+    plotter.plotIdx(logger, endIdx)
     plt.show()
 
 
@@ -51,10 +74,6 @@ def train(
     trainer = Trainer(config, X_star)
     trainer.train()
     save(trainer.logger, config.save_file)
-
-    if config.plotting:
-        plotter = Plot(X_star, config)
-        plotter.plot(trainer.logger)
 
 
 if __name__ == "__main__":
