@@ -41,8 +41,8 @@ class UCBAquisition:
         D = (self.c.domain_end_p - self.c.domain_start_p) * (
             self.c.domain_end_d - self.c.domain_start_d
         )
-        beta_t = 2 * np.log(
-            D * self.t * self.t * math.pi * math.pi / (6 * self.c.gamma)
+        beta_t = (
+            2 * np.log(D * self.t * self.t * math.pi * math.pi / (6 * self.c.gamma)) / 5
         )
         return x.mean - np.sqrt(beta_t) * x.variance
         # return -torch.sqrt(self.beta) * x.variance

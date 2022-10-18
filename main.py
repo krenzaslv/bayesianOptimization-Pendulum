@@ -11,6 +11,7 @@ from src.logger import save, load
 from src.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt
 
+# torch.set_default_dtype(torch.float64)
 app = typer.Typer()
 
 

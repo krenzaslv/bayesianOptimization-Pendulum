@@ -174,7 +174,7 @@ class Plot:
         )
         self.ax2.legend()
         self.ax3.legend()
-        plt.savefig("data/{}.png".format(i))
+        plt.savefig("data/{0:0>3}.png".format(i))
 
         plt.pause(0.001)
 

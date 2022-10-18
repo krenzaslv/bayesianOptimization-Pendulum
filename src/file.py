@@ -20,8 +20,9 @@ def makeGIF():
     #                 writer.append_data(image)
     frames = []
     for root, dirs, files in os.walk("data"):
+        files.sort()
         for file in files:
             if file.endswith(".png"):
                 image = imageio.imread("data/{}".format(file))
                 frames.append(image)
-    imageio.mimsave("data/animation.gif", frames, format="GIF", duration=0.5)
+    imageio.mimsave("data/animation.gif", frames, format="GIF", duration=0.3)
