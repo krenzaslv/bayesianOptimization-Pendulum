@@ -22,6 +22,7 @@ class Config:
         self.lr_aq = self.getFloat("lr_aq")
         self.domain_start_p = self.getFloat("domain_start_p")
         self.domain_end_p = self.getFloat("domain_end_p")
+        self.plotting_n_samples = self.getInt("plotting_n_samples")
         self.domain_start_d = self.getFloat("domain_start_d")
         self.domain_end_d = self.getFloat("domain_end_d")
         self.gamma = self.getFloat("gamma")

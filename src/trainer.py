@@ -7,9 +7,9 @@ from skopt import gp_minimize
 from src.GPModel import ExactGPModel, MLPMean
 from src.normalizer import Normalizer
 from src.simulator import simulate
+from src.logger import Logger
 from src.dynamics import U_bo, dynamics_real, U_pert
 from src.optimizer import GPOptimizer, UCBAquisition
-from src.plotter import Plotter
 import torch
 from gpytorch.mlls import ExactMarginalLogLikelihood
 import gpytorch
@@ -25,7 +25,7 @@ class Trainer:
     def __init__(self, config, X_star):
         self.config = config
         self.X_star = X_star
-        self.plotter = Plotter()
+        self.logger = Logger()
 
     def loss(self, k):
         config = copy.copy(self.config)
@@ -56,7 +56,7 @@ class Trainer:
         likelihood.noise = 1e-4
         likelihood.noise_covar.raw_noise.requires_grad_(False)  # Dont optimize
 
-        for i in track(range(self.config.n_opt_samples), description="Processing..."):
+        for i in track(range(self.config.n_opt_samples), description="Training..."):
             # 1. collect Data
             [x_k, y_k, X_bo] = self.loss(k)
             [train_x[i, :], train_y[i]] = [x_k, y_k]
@@ -89,17 +89,4 @@ class Trainer:
             k = ucbAquisition.optimize(self.config.n_opt_iterations_aq)
             k = xNormalizer.itransform(k)
 
-            if self.config.plotting:
-                self.plotter.plot(
-                    model,
-                    train_x,
-                    train_y,
-                    i,
-                    self.X_star,
-                    X_bo,
-                    # x_min,
-                    self.config,
-                    xNormalizer,
-                    yNormalizer,
-                    self.config,
-                )
+            self.logger.log(model, X_bo, x_k, y_k, xNormalizer, yNormalizer)

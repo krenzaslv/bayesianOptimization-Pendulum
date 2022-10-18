@@ -4,6 +4,7 @@ from src.trainer import Trainer
 from src.simulator import simulate
 from src.dynamics import dynamics_ideal, U_star
 from src.config import Config
+from src.plot import Plot
 import torch
 import cProfile, pstats
 
@@ -33,6 +34,10 @@ def train(
     X_star = simulate(config, dynamics_ideal, U_star)
     trainer = Trainer(config, X_star)
     trainer.train()
+
+    if config.plotting:
+        plotter = Plot(X_star, config)
+        plotter.plot(trainer.logger)
 
 
 if __name__ == "__main__":

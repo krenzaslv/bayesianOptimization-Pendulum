@@ -27,4 +27,5 @@ domain_start_p=0
 domain_end_p=5
 domain_start_d=-2
 domain_end_d=2
-plotting=False
+plotting=True
+plotting_n_samples=200
