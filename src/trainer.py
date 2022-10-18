@@ -17,6 +17,8 @@ import copy
 import math
 import matplotlib.pyplot as plt
 from src.tools import clamp
+from rich.progress import track
+import threading
 
 
 class Trainer:
@@ -42,7 +44,7 @@ class Trainer:
         #     X_bo,
         # ]
 
-    def train(self, plotting=True):
+    def train(self):
         fig = plt.figure()
         train_x = torch.zeros(self.config.n_opt_samples, 2)
         train_y = torch.zeros(self.config.n_opt_samples)
@@ -54,7 +56,7 @@ class Trainer:
         likelihood.noise = 1e-4
         likelihood.noise_covar.raw_noise.requires_grad_(False)  # Dont optimize
 
-        for i in range(self.config.n_opt_samples):
+        for i in track(range(self.config.n_opt_samples), description="Processing..."):
             # 1. collect Data
             [x_k, y_k, X_bo] = self.loss(k)
             [train_x[i, :], train_y[i]] = [x_k, y_k]
@@ -87,7 +89,7 @@ class Trainer:
             k = ucbAquisition.optimize(self.config.n_opt_iterations_aq)
             k = xNormalizer.itransform(k)
 
-            if plotting:
+            if self.config.plotting:
                 self.plotter.plot(
                     model,
                     train_x,

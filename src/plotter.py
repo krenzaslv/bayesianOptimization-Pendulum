@@ -43,15 +43,16 @@ class Plotter:
         self.ax2.clear()
         self.ax3.clear()
         self.ax4.clear()
-        self.ax.set_ylim(c.domain_start, c.domain_end)
-        self.ax.set_xlim(c.domain_start, c.domain_end)
+        self.ax.set_ylim(c.domain_start_d, c.domain_end_d)
+        self.ax.set_xlim(c.domain_start_p, c.domain_end_p)
         # self.ax.set_zlim(-1, 30)
         self.ax2.set_ylim(-4, 4)
         self.ax3.set_ylim(-4, 4)
 
         # x = xNormalizer.transform(torch.linspace(-20, 20, n_samples))
-        grid = torch.linspace(c.domain_start, c.domain_end, n_samples)
-        grid_x, grid_y = torch.meshgrid(grid, grid, indexing="xy")
+        grid_x = torch.linspace(c.domain_start_p, c.domain_end_p, n_samples)
+        grid_y = torch.linspace(c.domain_start_d, c.domain_end_d, n_samples)
+        grid_x, grid_y = torch.meshgrid(grid_x, grid_y, indexing="xy")
         inp = torch.stack((grid_x, grid_y), dim=2).float()
         with torch.autograd.no_grad():
             out = model(xNormalizer.transform(inp))
@@ -129,7 +130,8 @@ class Plotter:
             self.ax2.plot(bo[:, 0], color="blue", alpha=0.1)
 
         self.ax2.plot(X_star[:, 0], color="red")
-        self.ax2.plot(self.X_min[:, 0], color="orange")
+        self.ax2.plot(self.X_bo_buffer[0][:, 0], color="orange")
+        self.ax2.plot(self.X_min[:, 0], color="green")
         self.ax2.plot(config.pi * np.ones(X_star.shape[0]), color="red")
         self.ax2.set_ylabel("theta")
         self.ax2.set_xlabel("t")
@@ -138,7 +140,8 @@ class Plotter:
             self.ax3.plot(bo[:, 1], color="blue", alpha=0.1)
 
         self.ax3.plot(X_star[:, 1], color="red")
-        self.ax3.plot(self.X_min[:, 1], color="orange")
+        self.ax3.plot(self.X_bo_buffer[0][:, 1], color="orange")
+        self.ax3.plot(self.X_min[:, 1], color="green")
         self.ax3.set_ylabel("theta_dot")
         self.ax3.set_xlabel("t")
 
