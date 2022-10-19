@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class Normalizer:
     def fit_transform(self, data, dim=0):
         if data.shape[0] > 1:
@@ -7,6 +10,9 @@ class Normalizer:
             self.mean = data[0].detach().numpy()
             self.std = 1
         return self.transform(data)
+        # self.mean = 0
+        # self.std = 1
+        # return self.transform(data)
 
     def transform(self, data):
         return (data - self.mean) / self.std

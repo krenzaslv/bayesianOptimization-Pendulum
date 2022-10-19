@@ -17,7 +17,7 @@ import copy
 import math
 import matplotlib.pyplot as plt
 from src.tools import clamp
-import threading
+from skopt import gp_minimize
 
 
 class Trainer:
@@ -32,7 +32,7 @@ class Trainer:
         config.kd_bo = k[1]
         X_bo = simulate(config, dynamics_real, U_bo)
         stepsize = math.floor(X_bo.shape[0] / self.config.n_evaluate)
-        norm = clamp(np.linalg.norm(self.X_star[::stepsize] - X_bo[::stepsize]), 10)
+        norm = clamp(np.linalg.norm(self.X_star[::stepsize] - X_bo[::stepsize]), 3)
         norm *= norm
         # norm = np.linalg.norm(self.X_star[::stepsize] - X_bo[::stepsize])
 
@@ -45,7 +45,20 @@ class Trainer:
         # ]
 
     def train(self):
-        fig = plt.figure()
+        # res = gp_minimize(
+        #     self.loss,
+        #     [
+        #         (self.config.domain_start_p, self.config.domain_end_p),
+        #         (self.config.domain_start_d, self.config.domain_end_d),
+        #     ],
+        #     acq_func="LCB",
+        #     n_calls=100,
+        #     n_random_starts=20,
+        #     noise=1e-4,
+        #     random_state=1234,
+        # )
+        # print(res)
+
         train_x = torch.zeros(self.config.n_opt_samples, 2)
         train_y = torch.zeros(self.config.n_opt_samples)
         k = np.array([self.config.kd_bo, self.config.kp_bo])
@@ -56,6 +69,8 @@ class Trainer:
         likelihood.noise = 1e-4
         likelihood.noise_covar.raw_noise.requires_grad_(False)  # Dont optimize
 
+        yMin = 1e10
+
         for i in track(range(self.config.n_opt_samples), description="Training..."):
             # 1. collect Data
             [x_k, y_k, X_bo] = self.loss(k)
@@ -64,6 +79,8 @@ class Trainer:
             yNormalizer = Normalizer()
             x_train_n = xNormalizer.fit_transform(train_x[: i + 1, :])
             y_train_n = yNormalizer.fit_transform(train_y[: i + 1])
+            if y_k < yMin:
+                yMin = y_k
 
             # 2. Fit GP
             # mean_module = gpytorch.means.ConstantMean()
@@ -84,7 +101,7 @@ class Trainer:
 
             # 3. Find next k with UCB
             ucbAquisition = UCBAquisition(
-                model, likelihood, xNormalizer, i, self.config
+                model, likelihood, xNormalizer, i, self.config, yMin
             )
             k = ucbAquisition.optimize(self.config.n_opt_iterations_aq)
             k = xNormalizer.itransform(k)
