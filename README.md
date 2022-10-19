@@ -1,5 +1,5 @@
 ![Employee data](/doc/animation.gif?raw=true "Employee Data title")
-# Bayesion Optimization for a Pendulum
+# Bayesian Optimization for disturbed dynamics
 Actively learning the disturbance of a dynamical system. The disturbance is modeled with a PD controller
 
 ## Setup
