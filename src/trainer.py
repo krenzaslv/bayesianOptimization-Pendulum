@@ -24,7 +24,7 @@ class Trainer:
     def __init__(self, config, X_star):
         self.config = config
         self.X_star = X_star
-        self.logger = Logger()
+        self.logger = Logger(config)
 
     def loss(self, k):
         config = copy.copy(self.config)
@@ -58,7 +58,6 @@ class Trainer:
         #     random_state=1234,
         # )
         # print(res)
-
         train_x = torch.zeros(self.config.n_opt_samples, 2)
         train_y = torch.zeros(self.config.n_opt_samples)
         k = np.array([self.config.kd_bo, self.config.kp_bo])
@@ -70,6 +69,11 @@ class Trainer:
         likelihood.noise_covar.raw_noise.requires_grad_(False)  # Dont optimize
 
         yMin = 1e10
+        # mean_module = gpytorch.means.ConstantMean()
+        mean_module = gpytorch.means.ConstantMean()
+        # mean_module = gpytorch.means.LinearMean(2)
+        # mean_module = MLPMean()
+        covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.MaternKernel())
 
         for i in track(range(self.config.n_opt_samples), description="Training..."):
             # 1. collect Data
@@ -77,33 +81,50 @@ class Trainer:
             [train_x[i, :], train_y[i]] = [x_k, y_k]
             xNormalizer = Normalizer()
             yNormalizer = Normalizer()
-            x_train_n = xNormalizer.fit_transform(train_x[: i + 1, :])
-            y_train_n = yNormalizer.fit_transform(train_y[: i + 1])
+
             if y_k < yMin:
                 yMin = y_k
+                print(yMin)
 
             # 2. Fit GP
-            # mean_module = gpytorch.means.ConstantMean()
-            mean_module = gpytorch.means.ZeroMean()
-            # mean_module = gpytorch.means.LinearMean(2)
-            # mean_module = MLPMean()
-            covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.MaternKernel())
-            model = ExactGPModel(
-                x_train_n, y_train_n, likelihood, mean_module, covar_module
-            )
 
-            gpOptimizer = GPOptimizer(model, likelihood, self.config.lr_gp)
-            gpOptimizer.optimize(
-                x_train_n,
-                y_train_n,
+            if i == 0:
+                model = ExactGPModel(
+                    train_x[:1, :],
+                    train_y[0:1],
+                    likelihood,
+                    mean_module,
+                    covar_module,
+                )
+            else:
+                # Todo change this
+                model = ExactGPModel(
+                    train_x[: i + 1, :],
+                    train_y[0 : i + 1],
+                    likelihood,
+                    mean_module,
+                    covar_module,
+                )
+                # model = model.get_fantasy_model(
+                #     torch.reshape(x_k, (1, 2)), torch.tensor([y_k], dtype=torch.float32)
+                # )
+
+            gpOptimizer = GPOptimizer(
+                model, likelihood, i, self.config, self.logger.writer, self.config.lr_gp
+            )
+            loss_gp = gpOptimizer.optimize(
+                train_x[: i + 1, :],
+                train_y[: i + 1],
                 self.config.n_opt_iterations_gp,
             )
 
             # 3. Find next k with UCB
             ucbAquisition = UCBAquisition(
-                model, likelihood, xNormalizer, i, self.config, yMin
+                model, likelihood, xNormalizer, i, self.config, yMin, self.logger.writer
             )
-            k = ucbAquisition.optimize(self.config.n_opt_iterations_aq)
+            [k, loss_ucb] = ucbAquisition.optimize(self.config.n_opt_iterations_aq)
             k = xNormalizer.itransform(k)
 
-            self.logger.log(model, X_bo, x_k, y_k, xNormalizer, yNormalizer)
+            self.logger.log(
+                model, i, X_bo, x_k, y_k, xNormalizer, yNormalizer, loss_gp, loss_ucb
+            )

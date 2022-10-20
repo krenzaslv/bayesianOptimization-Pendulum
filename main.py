@@ -7,7 +7,7 @@ from src.config import Config
 from src.plot import Plot
 import torch
 import cProfile, pstats
-from src.logger import save, load
+from src.logger import load
 from src.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt
 
@@ -74,7 +74,7 @@ def train(
     X_star = simulate(config, dynamics_ideal, U_star)
     trainer = Trainer(config, X_star)
     trainer.train()
-    save(trainer.logger, config.save_file)
+    trainer.logger.save(config.save_file)
 
 
 if __name__ == "__main__":
