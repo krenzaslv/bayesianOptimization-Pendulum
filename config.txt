@@ -6,51 +6,85 @@ save_file = data.txt
 g = 9.81
 l = 1
 m = 1
+
+; Desired state
 pi = 0
+
+; How many simulation steps
 n_simulation = 5000
+dt = 0.001
+
+; Initial state
 x0 = -2.14
 x0_dot = 0
-dt = 0.001
+
+; Maximum torque that can be applied by controller
 max_torque = 100
 
 [Controller]
+; Disturbance parameters
 kp =3
 kd =2
+
+; Initial optimization parameters
 kd_bo = 0
 kp_bo = 0
+
+; Optimal parameters from Simulation
 k1 = 4
 k2 = 3.5
 
 [Optimization]
+; Number of Bayesian Optimization steps
 n_opt_samples = 50
 
+; Number of Optimizationsteps for GP hyperparameter estimation
 n_opt_iterations_gp = 0
 lr_gp = 0.1
 weight_decay_gp = 0.0
 
+; Number of Optimizationsteps for finding Aquisition optimum
 n_opt_iterations_aq = 0
-lr_aq = 0.001
+lr_aq = 0.1
 weight_decay_aq = 0.0
 
+; Number of states in trajectory to evaluate for the error
 n_evaluate = 1000
 
+; Domain bounds for Bayesian optimization
 domain_start_p=-4
 domain_end_p=4
 domain_start_d=-4
 domain_end_d=4
 
+; Initial lenghtscale and Prior for the lenght scale of the Matern kernel
 init_lenghtscale = 0.5
+
+; Variance of the prior on the lenghscale of the Matern kernel
 init_variance = 0.01
 
+; Gamma parameter from https://arxiv.org/abs/0912.3995v4
 gamma = 0.1
+
+; Scale factor for beta
 scale_beta = 0.5
+
+; Use this fixed beta instead if beta_fixed is true
 beta = 1
 beta_fixed = False
 
+; Choose aquisition function from ['ucb', 'ei']
 aquisition = ucb
+
+; Use finite linearly spaced subset instead of continous
 ucb_use_set = True
+
+; Size of the subset is ucb_set_n**2
 ucb_set_n = 20
+
+; Number of random samples to use for continous aquisition optimization
 n_sample_points = 10000
 
 [Plotting]
+; Number of linearly spaced samples for plotting
 plotting_n_samples=50
