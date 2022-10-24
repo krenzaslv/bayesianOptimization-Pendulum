@@ -9,6 +9,8 @@ virtualenv venv
 . .venv/bin/activate
 pip install -r requirements.txt
 ```
+## Settings
+Most settings can be changed in `config.txt`
 
 ## Run
 To train the model run
@@ -37,5 +39,3 @@ To create a gif after the plot run
 ```
  python main.py --help
 ```
-## Settings
-Most settings can be changed in `config.txt`
