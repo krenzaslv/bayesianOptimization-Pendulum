@@ -69,7 +69,6 @@ def plot_real(
     out = np.zeros(shape=(inp.shape[0], inp.shape[1]))
     X_star = simulate(config, dynamics_ideal, U_star)
     trainer = Trainer(config, X_star)
-    fig = plt.figure()
     ax = plt.axes(projection="3d")
     ax.plot(config.kp, config.kd, 0, marker="X", markersize="20")
     for i in track(range(inp.shape[0]), description="Simulating..."):

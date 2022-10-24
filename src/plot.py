@@ -1,14 +1,8 @@
 import torch
-from gpytorch.mlls import ExactMarginalLogLikelihood
-import gpytorch
-import copy
-import math
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from matplotlib import cm
-from matplotlib.animation import FuncAnimation
-import pickle
 from rich.progress import track
 
 

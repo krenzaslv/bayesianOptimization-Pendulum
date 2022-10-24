@@ -2,7 +2,6 @@ import numpy as np
 import torch
 import pickle
 from src.summary_writer import SummaryWriter
-from torch.utils.tensorboard.summary import hparams
 
 
 class Logger:

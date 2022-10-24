@@ -2,12 +2,8 @@ import torch
 import gpytorch
 from torch.autograd import Variable
 import numpy as np
-from src.random import rand, rand2d_torch
-from matplotlib import cm
+from src.random import rand2d_torch
 import math
-from scipy.stats import norm
-from torch.utils.tensorboard import SummaryWriter
-from torch.distributions.normal import Normal
 
 
 class GPOptimizer:
@@ -26,7 +22,7 @@ class GPOptimizer:
         optimizer = torch.optim.Adam(
             self.model.parameters(), lr=self.lr, weight_decay=self.c.weight_decay_gp
         )
-        scheduler1 = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self.model)
         loss = 0
         for i in range(training_steps):
@@ -35,6 +31,7 @@ class GPOptimizer:
             loss = -mll(output, train_y)
             loss.backward()
             optimizer.step()
+            scheduler.step()
 
             if self.t == self.c.n_opt_samples - 1:
                 self.logger.add_scalar("Loss/GP_LAST", loss, i)
@@ -110,7 +107,7 @@ class UCBAquisition:
         optimizer = torch.optim.Adam(
             [t], self.c.lr_aq, weight_decay=self.c.weight_decay_aq
         )
-        scheduler1 = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
         aquisition = self.ei_loss if self.c.aquisition == "ei" else self.ucb_loss
 
@@ -120,7 +117,7 @@ class UCBAquisition:
             loss = aquisition(output).sum()
             loss.backward()
             optimizer.step()
-            # t.clamp(-5, 5)
+            scheduler.step()
             if self.t == self.c.n_opt_samples - 1:
                 loss = aquisition(self.model(t))
                 self.logger.add_scalar("Loss/AQ_LAST", loss.min(), i)

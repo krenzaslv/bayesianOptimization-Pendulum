@@ -74,7 +74,7 @@ beta = 1
 beta_fixed = False
 
 ; Choose aquisition function from ['ucb', 'ei']
-aquisition = ucb
+aquisition =ucb
 
 ; Use finite linearly spaced subset instead of continous
 ucb_use_set = True

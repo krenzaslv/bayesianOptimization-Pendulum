@@ -1,29 +1,24 @@
-import typer
-import numpy as np
-import time
-from rich.progress import track
-from skopt import gp_minimize
-
-from src.GPModel import ExactGPModel, MLPMean
-from src.normalizer import Normalizer, Normalizer2d
-from src.simulator import simulate
-from src.logger import Logger
-from src.dynamics import U_bo, dynamics_real, U_pert
-from src.optimizer import GPOptimizer, UCBAquisition
-import torch
-from gpytorch.mlls import ExactMarginalLogLikelihood
-import gpytorch
 import copy
 import math
-import matplotlib.pyplot as plt
-from src.tools import clamp
-from skopt import gp_minimize
+
+import gpytorch
+import numpy as np
+from rich.progress import track
+import torch
+
+from src.GPModel import ExactGPModel
+from src.dynamics import U_bo, dynamics_real
+from src.logger import Logger
+from src.normalizer import Normalizer, Normalizer2d
+from src.optimizer import GPOptimizer, UCBAquisition
+from src.simulator import simulate
 
 
 class Trainer:
     def __init__(self, config, X_star):
         self.config = config
         self.X_star = X_star
+
         self.logger = Logger(config)
 
     def loss(self, k):
@@ -33,16 +28,8 @@ class Trainer:
         X_bo = simulate(config, dynamics_real, U_bo)
         stepsize = math.floor(X_bo.shape[0] / self.config.n_evaluate)
         norm = np.linalg.norm(self.X_star[::stepsize] - X_bo[::stepsize])
-        # norm *= norm
-        # norm = np.linalg.norm(self.X_star[::stepsize] - X_bo[::stepsize])
 
         return [torch.tensor([k[0], k[1]]), norm, X_bo]
-        # Toy quadratic function
-        # return [
-        #     torch.tensor([k[0], k[1]]),
-        #     (k[0] - 1) * (k[0] - 1) + (k[1] - 3) * (k[1] - 3),
-        #     X_bo,
-        # ]
 
     def createModel(self, train_x_n, train_y_n, likelihood):
         mean_module = gpytorch.means.ZeroMean()
@@ -52,7 +39,8 @@ class Trainer:
             gpytorch.kernels.MaternKernel(
                 lengthscale_prior=gpytorch.priors.MultivariateNormalPrior(
                     loc=torch.tensor(
-                        [self.config.init_lenghtscale, self.config.init_lenghtscale]
+                        [self.config.init_lenghtscale,
+                            self.config.init_lenghtscale]
                     ),
                     covariance_matrix=torch.tensor(
                         [
@@ -76,19 +64,6 @@ class Trainer:
         return model
 
     def train(self):
-        # res = gp_minimize(
-        #     self.loss,
-        #     [
-        #         (self.config.domain_start_p, self.config.domain_end_p),
-        #         (self.config.domain_start_d, self.config.domain_end_d),
-        #     ],
-        #     acq_func="LCB",
-        #     n_calls=100,
-        #     n_random_starts=20,
-        #     noise=1e-4,
-        #     random_state=1234,
-        # )
-        # print(res)
         train_x = torch.zeros(self.config.n_opt_samples, 2)
         train_y = torch.zeros(self.config.n_opt_samples)
         k = np.array([self.config.kd_bo, self.config.kp_bo])
@@ -128,7 +103,8 @@ class Trainer:
             ucbAquisition = UCBAquisition(
                 model, likelihood, xNormalizer, i, self.config, yMin, self.logger.writer
             )
-            [k, loss_ucb] = ucbAquisition.optimize(self.config.n_opt_iterations_aq)
+            [k, loss_ucb] = ucbAquisition.optimize(
+                self.config.n_opt_iterations_aq)
             k = xNormalizer.itransform(k)[0].detach().numpy()
 
             self.logger.log(

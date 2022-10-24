@@ -28,6 +28,7 @@ def test_correctBajesianParametersRecoverUStar():
     x_0 = np.array([1, 2])
     U1 = U_star(x_0, c)
     U2 = U_pert(x_0, c, U_bo)
+
     assert U1 == pytest.approx(U2)
 
 

@@ -7,7 +7,7 @@ class Config:
         self.config = ConfigParser()
         self.config.readfp(open(path))
         self.m = self.config.getfloat("Dynamics", "m")
-        self.l = self.config.getfloat("Dynamics", "l")
+        self.L = self.config.getfloat("Dynamics", "l")
         self.pi = self.config.getfloat("Dynamics", "pi")
         self.g = self.config.getfloat("Dynamics", "g")
         self.dt = self.config.getfloat("Dynamics", "dt")
