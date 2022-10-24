@@ -7,6 +7,7 @@ from matplotlib import cm
 import math
 from scipy.stats import norm
 from torch.utils.tensorboard import SummaryWriter
+from torch.distributions.normal import Normal
 
 
 class GPOptimizer:
@@ -48,7 +49,7 @@ class UCBAquisition:
         self.xNormalizer = xNormalizer
         self.t = t + 1
         self.c = c
-        self.yMin = yMin
+        self.yMin = torch.tensor([yMin])
         self.logger = logger
 
     def ucb_loss(self, x):
@@ -62,16 +63,15 @@ class UCBAquisition:
         )
         return x.mean - np.sqrt(beta_t) * self.c.scale_beta * x.variance
 
-    # TODO doesnt work...
     def ei_loss(self, x):
-        m = x.mean.detach().numpy()
-        sigma = x.mean.detach().numpy()
-        sigma = x.variance
-        u = (m - self.yMin) / sigma
-        u = u.detach().numpy()
-        ei = sigma * (u * norm().cdf(u) + norm().pdf(u))
-        ei[sigma <= 0] = 0
-        return ei
+        m = x.mean
+        sigma = x.variance.clamp_min(1e-9).sqrt()
+        u = -(m - self.yMin.expand_as(m) + 10) / sigma
+        dist = torch.distributions.normal.Normal(
+            torch.zeros_like(u), torch.ones_like(u)
+        )
+        ei = sigma * (dist.cdf(u) + u * torch.exp(dist.log_prob(u)))
+        return -ei
 
     def getInitPoints(self):
         if self.c.ucb_use_set:
