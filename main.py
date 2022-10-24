@@ -10,6 +10,7 @@ import cProfile, pstats
 from src.logger import load
 from src.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt
+from rich.progress import track
 
 # torch.set_default_dtype(torch.float64)
 app = typer.Typer()
@@ -44,6 +45,38 @@ def plot(
     X_star = simulate(config, dynamics_ideal, U_star)
     plotter = Plot(X_star, config)
     plotter.plot(logger)
+    plt.show()
+
+
+@app.command()
+def plot_real(
+    config_path: str = typer.Option("config.txt", help="Path to config file"),
+):
+
+    config = Config(config_path)
+    grid_x = torch.linspace(
+        config.domain_start_p,
+        config.domain_end_p,
+        config.plotting_n_samples,
+    )
+    grid_y = torch.linspace(
+        config.domain_start_d,
+        config.domain_end_d,
+        config.plotting_n_samples,
+    )
+    grid_x, grid_y = torch.meshgrid(grid_x, grid_y, indexing="xy")
+    inp = np.stack((grid_x, grid_y), axis=2)
+    out = np.zeros(shape=(inp.shape[0], inp.shape[1]))
+    X_star = simulate(config, dynamics_ideal, U_star)
+    trainer = Trainer(config, X_star)
+    fig = plt.figure()
+    ax = plt.axes(projection="3d")
+    ax.plot(config.kp, config.kd, 0, marker="X", markersize="20")
+    for i in track(range(inp.shape[0]), description="Simulating..."):
+        for j in range(inp.shape[1]):
+            [x_k, y_k, _] = trainer.loss(inp[i, j])
+            out[i, j] = y_k
+    ax.plot_surface(inp[:, :, 0], inp[:, :, 1], out)
     plt.show()
 
 

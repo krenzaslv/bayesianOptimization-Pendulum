@@ -1,7 +1,10 @@
 import pytest
 import numpy as np
+import torch
 
 from src.dynamics import dynamics_ideal, dynamics_real, U_star, U_bo, U_pert
+
+torch.set_default_dtype(torch.float64)
 
 
 class MockConfig:
@@ -11,7 +14,7 @@ class MockConfig:
         self.k1 = 3
         self.k2 = 2
         self.kp_bo = 4
-        self.kd_bo = 2
+        self.kd_bo = 1
         self.m = 1
         self.g = 9.81
         self.l = 1

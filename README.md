@@ -17,19 +17,25 @@ To train the model run
  python main.py train
 ```
 To show plot the last state run
+## Visualize
+To visualize various metrics run
+```
+tensorboard --logdir=runs
+
+```
+To visualize the search process run
 ```
  python main.py plot-end
-```
-To plot the animation run
-```
  python main.py plot
 ```
-To create a gif run
+To create a gif after the plot run
 ```
  python main.py make-gif
 ```
+## Help
 
 ```
  python main.py --help
 ```
+## Settings
 Most settings can be changed in `config.txt`

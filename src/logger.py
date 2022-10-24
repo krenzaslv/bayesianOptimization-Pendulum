@@ -1,7 +1,8 @@
 import numpy as np
 import torch
 import pickle
-from torch.utils.tensorboard import SummaryWriter
+from src.summary_writer import SummaryWriter
+from torch.utils.tensorboard.summary import hparams
 
 
 class Logger:
@@ -29,6 +30,13 @@ class Logger:
 
         self.writer.add_scalar("Loss/GP", loss_gp, i)
         self.writer.add_scalar("Loss/Aquisition", loss_aq, i)
+        self.writer.add_scalar("Loss/yMin", self.y_min_buffer[i], i)
+        self.writer.add_scalar(
+            "GP/lengthscale_p", model.covar_module.base_kernel.lengthscale[0, 0], i
+        )
+        self.writer.add_scalar(
+            "GP/lengthscale_d", model.covar_module.base_kernel.lengthscale[0, 1], i
+        )
         if i == self.c.n_opt_samples - 1:
             self.writer.add_hparams(
                 {
@@ -38,14 +46,25 @@ class Logger:
                     "weight_decay_aq": self.c.weight_decay_aq,
                     "n_opt_iterations_aq": self.c.n_opt_iterations_aq,
                     "n_opt_iterations_gp": self.c.n_opt_iterations_gp,
+                    "init_lenghtscale": self.c.init_lenghtscale,
+                    "init_variance": self.c.init_variance,
                     "gamma": self.c.gamma,
                     "weight_decay_aq": self.c.weight_decay_aq,
                     "n_opt_samples": self.c.n_opt_samples,
+                    "beta_fixed": self.c.beta_fixed,
+                    "beta": self.c.beta,
+                    "ucb_use_set": self.c.ucb_use_set,
+                    "ucb_set_n": self.c.ucb_set_n,
                 },
                 {
-                    "hparam/GP": loss_gp,
-                    "hparam/AQ": loss_aq,
-                    "hparam/yMin": self.y_min_buffer[i],
+                    # "hparam/GP": loss_gp,
+                    # "hparam/AQ": loss_aq,
+                    # "hparam/yMin": self.y_min_buffer[i],
+                    "Loss/GP": None,
+                    "Loss/yMin": None,
+                    "Loss/Aquisition": None,
+                    "GP/lengthscale_p": None,
+                    "GP/lengthscale_d": None,
                 },
             )
 

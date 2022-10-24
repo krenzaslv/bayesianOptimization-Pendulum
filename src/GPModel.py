@@ -18,7 +18,9 @@ class ExactGPModel(gpytorch.models.ExactGP):
 class MLPMean(gpytorch.means.Mean):
     def __init__(self, dim=2):
         super(MLPMean, self).__init__()
-        self.mlp = Sequential(Linear(dim, 32), ReLU(), Linear(32, 1))
+        self.mlp = Sequential(
+            Linear(dim, 32), ReLU(), Linear(32, 32), ReLU(), Linear(32, 1)
+        )
         for layer in self.mlp.children():
             if isinstance(layer, Linear):
                 torch.nn.init.xavier_uniform_(layer.weight)

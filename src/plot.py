@@ -35,8 +35,8 @@ class Plot:
         self.ax2.clear()
         self.ax3.clear()
         self.ax4.clear()
-        self.ax.set_ylim(2 * self.config.domain_start_d, 2 * self.config.domain_end_d)
-        self.ax.set_xlim(2 * self.config.domain_start_p, 2 * self.config.domain_end_p)
+        self.ax.set_ylim(self.config.domain_start_d, self.config.domain_end_d)
+        self.ax.set_xlim(self.config.domain_start_p, self.config.domain_end_p)
         self.ax.set_ylabel("kp")
         self.ax.set_xlabel("kd")
         self.ax.set_zlabel("f(x)")
@@ -53,13 +53,13 @@ class Plot:
 
     def createGrid(self):
         grid_x = torch.linspace(
-            2 * self.config.domain_start_p,
-            2 * self.config.domain_end_p,
+            self.config.domain_start_p,
+            self.config.domain_end_p,
             self.config.plotting_n_samples,
         )
         grid_y = torch.linspace(
-            2 * self.config.domain_start_d,
-            2 * self.config.domain_end_d,
+            self.config.domain_start_d,
+            self.config.domain_end_d,
             self.config.plotting_n_samples,
         )
         grid_x, grid_y = torch.meshgrid(grid_x, grid_y, indexing="xy")
@@ -138,7 +138,7 @@ class Plot:
             out = model(xNormalizer.transform(inp))
 
         var = out.variance.detach().numpy()
-        mean = out.mean.detach().numpy()
+        mean = out.mean.detach()
 
         minIdx = np.argmin(y[: i + 1])
         x_min = x[minIdx]

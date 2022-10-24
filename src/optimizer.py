@@ -25,9 +25,9 @@ class GPOptimizer:
         optimizer = torch.optim.Adam(
             self.model.parameters(), lr=self.lr, weight_decay=self.c.weight_decay_gp
         )
-        # scheduler1 = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+        scheduler1 = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self.model)
-
+        loss = 0
         for i in range(training_steps):
             optimizer.zero_grad()
             output = self.model(train_x)
@@ -55,16 +55,12 @@ class UCBAquisition:
         D = (self.c.domain_end_p - self.c.domain_start_p) * (
             self.c.domain_end_d - self.c.domain_start_d
         )
-        beta_t = 2 * np.log(
-            D * (self.t + 1) * (self.t + 1) * math.pi / (6 * self.c.gamma)
+        beta_t = (
+            self.c.beta
+            if self.c.beta_fixed
+            else 2 * np.log(D * (self.t) * (self.t) * math.pi / (6 * self.c.gamma))
         )
-        # beta_t = 2 * np.log(
-        #     D * 1 / ((self.t + 1) * (self.t + 1)) * math.pi / (6 * self.c.gamma)
-        # )
         return x.mean - np.sqrt(beta_t) * self.c.scale_beta * x.variance
-        # return -torch.sqrt(self.beta) * x.variance
-        # return -torch.sqrt(self.beta) * x.variance
-        #
 
     # TODO doesnt work...
     def ei_loss(self, x):
@@ -77,26 +73,44 @@ class UCBAquisition:
         ei[sigma <= 0] = 0
         return ei
 
+    def getInitPoints(self):
+        if self.c.ucb_use_set:
+            xs = torch.linspace(
+                self.c.domain_start_p, self.c.domain_end_p, self.c.ucb_set_n
+            )
+            ys = torch.linspace(
+                self.c.domain_start_d, self.c.domain_end_d, self.c.ucb_set_n
+            )
+            x, y = torch.meshgrid(xs, ys, indexing="xy")
+            init = torch.stack((x, y), dim=2)
+            init = torch.reshape(init, (-1, 2))
+            init = torch.cat((init, torch.tensor([[self.c.kp, self.c.kd]])), 0)
+
+        else:
+            init = rand2d_torch(
+                self.c.domain_start_p,
+                self.c.domain_end_p,
+                self.c.domain_start_d,
+                self.c.domain_end_d,
+                self.c.n_sample_points,
+            )
+
+        t = Variable(
+            self.xNormalizer.transform(init),
+            requires_grad=True,
+        )
+        return t
+
     def optimize(self, training_steps):
         self.model.eval()
         self.likelihood.eval()
 
-        randInit = rand2d_torch(
-            self.c.domain_start_p,
-            self.c.domain_end_p,
-            self.c.domain_start_d,
-            self.c.domain_end_d,
-            self.c.n_sample_points,
-        )
-
-        t = Variable(
-            self.xNormalizer.transform(randInit),
-            requires_grad=True,
-        )
+        t = self.getInitPoints()
 
         optimizer = torch.optim.Adam(
             [t], self.c.lr_aq, weight_decay=self.c.weight_decay_aq
         )
+        scheduler1 = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
         aquisition = self.ei_loss if self.c.aquisition == "ei" else self.ucb_loss
 
@@ -115,4 +129,4 @@ class UCBAquisition:
 
         minIdx = torch.argmin(loss)
 
-        return [t[minIdx].detach().numpy(), loss[minIdx]]
+        return [t[minIdx], loss[minIdx]]
