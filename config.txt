@@ -36,7 +36,7 @@ k2 = 3.5
 
 [Optimization]
 ; Number of Bayesian Optimization steps
-n_opt_samples = 200
+n_opt_samples = 40 
 
 ; Number of Optimizationsteps for GP hyperparameter estimation
 n_opt_iterations_gp = 0
@@ -44,8 +44,8 @@ lr_gp = 0.1
 weight_decay_gp = 0.0
 
 ; Number of Optimizationsteps for finding Aquisition optimum
-n_opt_iterations_aq = 0
-lr_aq = 0.1
+n_opt_iterations_aq = 0 
+lr_aq = 0.01
 weight_decay_aq = 0.0
 
 ; Number of states in trajectory to evaluate for the error
@@ -58,16 +58,16 @@ domain_start_d=-4
 domain_end_d=4
 
 ; Initial lenghtscale and Prior for the lenght scale of the Matern kernel
-init_lenghtscale = 1
+init_lenghtscale = 0.5 
 
 ; Variance of the prior on the lenghscale of the Matern kernel
-init_variance = 0.01
+init_variance = 0.1
 
 ; Gamma parameter from https://arxiv.org/abs/0912.3995v4
 gamma = 0.1
 
 ; Scale factor for beta
-scale_beta = 0.5
+scale_beta = 0.5 
 
 ; Use this fixed beta instead if beta_fixed is True
 beta = 1
@@ -77,7 +77,7 @@ beta_fixed = False
 aquisition =ucb
 
 ; Use finite linearly spaced subset instead of continous
-ucb_use_set = True
+ucb_use_set = True 
 
 ; Size of the subset is ucb_set_n**2
 ucb_set_n = 20
