@@ -18,7 +18,6 @@ To train the model run
 ```
  python main.py train
 ```
-To show plot the last state run
 ## Visualize
 To visualize various metrics run
 ```
