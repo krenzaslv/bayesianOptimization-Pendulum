@@ -71,7 +71,7 @@ class Trainer:
         likelihood = gpytorch.likelihoods.GaussianLikelihood(
             noise_constraint=gpytorch.constraints.GreaterThan(1e-4)
         )
-        likelihood.noise = 1e-4
+        likelihood.noise = torch.tensor([1e-4])
         likelihood.noise_covar.raw_noise.requires_grad_(False)  # Dont optimize
 
         yMin = 1e10

@@ -4,3 +4,4 @@ data.txt
 data/*
 test/__pycache__
 runs/
+.vimspector.json

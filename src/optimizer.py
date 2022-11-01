@@ -5,7 +5,6 @@ import numpy as np
 from src.random import rand2d_torch
 import math
 
-
 class GPOptimizer:
     def __init__(self, model, likelihood, t, c, logger, lr=0.1):
         self.model = model
