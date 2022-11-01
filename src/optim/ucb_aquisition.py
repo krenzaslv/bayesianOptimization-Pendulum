@@ -14,6 +14,7 @@ class UCBAquisition:
         self.c = c
         self.yMin = torch.tensor([yMin])
         self.logger = logger
+        self.minIdxBuffer = []
 
     def ucb_loss(self, x):
         D = (self.c.domain_end_p - self.c.domain_start_p) * (
@@ -82,5 +83,11 @@ class UCBAquisition:
         loss = aquisition(self.model(t))
 
         minIdx = torch.argmin(loss)
+        
+        #Take next best value if already sampled
+        k = 1
+        while t[minIdx] in self.model.train_inputs[0]:
+            k += 1
+            _ ,minIdx = torch.kthvalue(loss, k)
 
         return [t[minIdx], loss[minIdx]]

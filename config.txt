@@ -4,20 +4,12 @@ save_file = data.txt
 
 [Optimization]
 ; Number of Bayesian Optimization steps
-n_opt_samples = 40 
-
-; Number of Optimizationsteps for GP hyperparameter estimation
-n_opt_iterations_gp = 0
-lr_gp = 0.1
-weight_decay_gp = 0.0
+n_opt_samples = 50 
 
 ; Number of Optimizationsteps for finding Aquisition optimum
 n_opt_iterations_aq = 0 
 lr_aq = 0.001
 weight_decay_aq = 0.0
-
-; Number of states in trajectory to evaluate for the error
-n_evaluate = 1000
 
 ; Domain bounds for Bayesian optimization
 domain_start_p=-4
@@ -35,17 +27,17 @@ init_variance = 0.1
 gamma = 0.1
 
 ; Scale factor for beta
-scale_beta = 0.5 
+scale_beta = 3 
 
 ; Use this fixed beta instead if beta_fixed is True
 beta = 1
-beta_fixed = False
+beta_fixed = True 
 
 ; Use finite linearly spaced subset instead of continous
 ucb_use_set = True 
 
 ; Size of the subset is ucb_set_n**2
-ucb_set_n = 20
+ucb_set_n = 100
 
 ; Number of random samples to use for continous aquisition optimization
 n_sample_points = 10000

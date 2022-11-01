@@ -75,16 +75,8 @@ class Trainer:
                 yMin = y_k
                 print("Iteration: {}, yMin: {}".format(i, yMin))
 
-            # 2. Fit GP
+            # 2. Update GP
             model = self.createModel(train_x_n, train_y_n, likelihood)
-            gpOptimizer = GPOptimizer(
-                model, likelihood, i, self.config, self.logger.writer, self.config.lr_gp
-            )
-            loss_gp = gpOptimizer.optimize(
-                train_x_n,
-                train_y_n,
-                self.config.n_opt_iterations_gp,
-            )
 
             # 3. Find next k with UCB
             ucbAquisition = UCBAquisition(
@@ -95,5 +87,5 @@ class Trainer:
             k = xNormalizer.itransform(k)[0].detach().numpy()
 
             self.logger.log(
-                model, i, X_bo, x_k, y_k, xNormalizer, yNormalizer, loss_gp, loss_ucb
+                model, i, X_bo, x_k, y_k, xNormalizer, yNormalizer, loss_ucb
             )

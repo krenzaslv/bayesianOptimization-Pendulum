@@ -16,7 +16,7 @@ class Logger:
         self.writer = SummaryWriter()
         self.c = config
 
-    def log(self, model, i, X_k, x_k, y_k, xNormalizer, yNormalizer, loss_gp, loss_aq):
+    def log(self, model, i, X_k, x_k, y_k, xNormalizer, yNormalizer, loss_aq):
         model.eval()
         self.X_buffer.append(X_k)
         self.model_buffer.append(model)
@@ -27,7 +27,6 @@ class Logger:
         minIdx = np.argmin(np.array(self.y_k_buffer))
         self.y_min_buffer.append(self.y_k_buffer[minIdx])
 
-        self.writer.add_scalar("Loss/GP", loss_gp, i)
         self.writer.add_scalar("Loss/Aquisition", loss_aq, i)
         self.writer.add_scalar("Loss/yMin", self.y_min_buffer[i], i)
         self.writer.add_scalar(
@@ -39,12 +38,9 @@ class Logger:
         if i == self.c.n_opt_samples - 1:
             self.writer.add_hparams(
                 {
-                    "lr_gp": self.c.lr_gp,
                     "lr_aq": self.c.lr_aq,
-                    "weight_decay_gp": self.c.weight_decay_gp,
                     "weight_decay_aq": self.c.weight_decay_aq,
                     "n_opt_iterations_aq": self.c.n_opt_iterations_aq,
-                    "n_opt_iterations_gp": self.c.n_opt_iterations_gp,
                     "init_lenghtscale": self.c.init_lenghtscale,
                     "init_variance": self.c.init_variance,
                     "gamma": self.c.gamma,
@@ -62,8 +58,8 @@ class Logger:
                     "Loss/GP": None,
                     "Loss/yMin": None,
                     "Loss/Aquisition": None,
-                    "GP/lengthscale_p": None,
-                    "GP/lengthscale_d": None,
+                    # "GP/lengthscale_p": None,
+                    # "GP/lengthscale_d": None,
                 },
             )
 
