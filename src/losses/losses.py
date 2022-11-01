@@ -18,4 +18,4 @@ class PendulumError():
         # norm = np.linalg.norm(self.X_star - X_bo)/config.n_simulation
         norm = np.linalg.norm(self.X_star - X_bo)/self.c.n_simulation
 
-        return [torch.tensor([k[0], k[1]]), norm, X_bo]
+        return [torch.tensor([k[0], k[1]]), -norm, X_bo]

@@ -61,7 +61,7 @@ class Trainer:
         likelihood.noise = torch.tensor([1e-4])
         likelihood.noise_covar.raw_noise.requires_grad_(False)  # Dont optimize
 
-        yMin = 1e10
+        yMin = -1e10
         for i in track(range(self.config.n_opt_samples), description="Training..."):
             # 1. collect Data
             [x_k, y_k, X_bo] = loss.evaluate(k)
@@ -71,7 +71,7 @@ class Trainer:
             train_x_n = xNormalizer.fit_transform(train_x[: i + 1])
             train_y_n = yNormalizer.fit_transform(train_y[: i + 1])
 
-            if y_k < yMin:
+            if y_k > yMin:
                 yMin = y_k
                 print("Iteration: {}, yMin: {}".format(i, yMin))
 

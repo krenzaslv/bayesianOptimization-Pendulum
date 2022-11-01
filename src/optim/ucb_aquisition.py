@@ -25,7 +25,7 @@ class UCBAquisition:
             if self.c.beta_fixed
             else 2 * np.log(D * (self.t) * (self.t) * math.pi / (6 * self.c.gamma))
         )
-        return x.mean - np.sqrt(beta_t) * self.c.scale_beta * x.variance
+        return x.mean + np.sqrt(beta_t) * self.c.scale_beta * x.variance
 
 
     def getInitPoints(self):
@@ -72,7 +72,7 @@ class UCBAquisition:
         for i in range(training_steps):
             optimizer.zero_grad()
             output = self.model(t)
-            loss = aquisition(output).sum()
+            loss = -aquisition(output).sum()
             loss.backward()
             optimizer.step()
             scheduler.step()
@@ -80,7 +80,7 @@ class UCBAquisition:
                 loss = aquisition(self.model(t))
                 self.logger.add_scalar("Loss/AQ_LAST", loss.min(), i)
 
-        loss = aquisition(self.model(t))
+        loss = -aquisition(self.model(t))
 
         minIdx = torch.argmin(loss)
         
