@@ -97,7 +97,7 @@ def plot_end(
 
 
 @app.command()
-def train(
+def train_pendulum(
     config_path: str = typer.Option("config.txt", help="Path to config file"),
 ):
     config = Config(config_path)
