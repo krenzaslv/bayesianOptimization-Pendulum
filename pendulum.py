@@ -4,7 +4,7 @@ from src.trainer import Trainer
 from src.pendulum.simulator import simulate
 from src.pendulum.dynamics import dynamics_ideal, U_star
 from src.config import Config
-from src.tools.plot import Plot
+from src.tools.plot import PlotPendulum
 import torch
 import cProfile, pstats
 from src.tools.logger import load
@@ -34,7 +34,7 @@ def plot(
 
     X_star = simulate(config_pendulum, dynamics_ideal, U_star)
 
-    plotter = Plot(X_star, config, config_pendulum)
+    plotter = PlotPendulum(X_star, config, config_pendulum)
     plotter.plot(logger)
     plt.show()
 
@@ -53,14 +53,14 @@ def plot_end(
     
     X_star = simulate(config_pendulum, dynamics_ideal, U_star)
 
-    plotter = Plot(X_star, config, config_pendulum)
+    plotter = PlotPendulum(X_star, config, config_pendulum)
     endIdx = len(logger.X_buffer) - 1
     plotter.plotIdx(logger, endIdx)
     plt.show()
 
 
 @app.command()
-def train_pendulum(
+def train(
     config_path: str = typer.Option("config.txt", help="Path to config file"),
     config_path_pendulum: str = typer.Option("config_pendulum.txt", help="Path to config file"),
 ):

@@ -6,7 +6,7 @@ from matplotlib import cm
 from rich.progress import track
 
 
-class Plot:
+class PlotPendulum:
     def __init__(self, X_star, config, config_pendulum):
         self.setupAxis()
         self.X_bo_buffer = []

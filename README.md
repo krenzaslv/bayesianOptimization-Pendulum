@@ -16,7 +16,7 @@ Most settings can be changed in `config.txt`
 To train the model run
 
 ```
- python main.py train
+ python pendulum.py train
 ```
 ## Visualize
 To visualize various metrics run
@@ -26,15 +26,15 @@ tensorboard --logdir=runs
 ```
 To visualize the search process run
 ```
- python main.py plot-end
- python main.py plot
+ python pendulum.py plot-end
+ python pendulum.py plot
 ```
 To create a gif after the plot run
 ```
- python main.py make-gif
+ python pendulum.py make-gif
 ```
 ## Help
 
 ```
- python main.py --help
+ python pendulum.py --help
 ```
