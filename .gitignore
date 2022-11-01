@@ -5,3 +5,9 @@ data/*
 test/__pycache__
 runs/
 .vimspector.json
+tools/__pycache__
+src/tools/__pycache__
+src/tools/__pycache__
+src/optim/__pycache__
+src/pendulum/__pycache__
+src/losses/__pycache__

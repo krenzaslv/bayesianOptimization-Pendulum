@@ -1,6 +1,6 @@
 import numpy as np
-from src.integrator import integrate
-from src.tools import clamp, angleDiff
+from src.tools.integrator import integrate
+from src.tools.math import clamp, angleDiff
 
 
 # c = config

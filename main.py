@@ -1,16 +1,17 @@
 import typer
 import numpy as np
 from src.trainer import Trainer
-from src.simulator import simulate
-from src.dynamics import dynamics_ideal, U_star
+from src.pendulum.simulator import simulate
+from src.pendulum.dynamics import dynamics_ideal, U_star
 from src.config import Config
-from src.plot import Plot
+from src.tools.plot import Plot
 import torch
 import cProfile, pstats
-from src.logger import load
-from src.file import clearFiles, makeGIF
+from src.tools.logger import load
+from src.tools.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt
 from rich.progress import track
+from src.losses.losses import pendulum_loss
 
 # torch.set_default_dtype(torch.float64)
 app = typer.Typer()
@@ -105,7 +106,7 @@ def train(
 
     X_star = simulate(config, dynamics_ideal, U_star)
     trainer = Trainer(config, X_star)
-    trainer.train()
+    trainer.train(pendulum_loss)
     trainer.logger.save(config.save_file)
 
 
