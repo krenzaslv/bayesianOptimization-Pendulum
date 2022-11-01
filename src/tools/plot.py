@@ -7,12 +7,13 @@ from rich.progress import track
 
 
 class Plot:
-    def __init__(self, X_star, config):
+    def __init__(self, X_star, config, config_pendulum):
         self.setupAxis()
         self.X_bo_buffer = []
         self.y_min_buffer = []
         self.X_star = X_star
         self.config = config
+        self.config_pendulum = config_pendulum
 
     def setupAxis(self):
         # plt.ion()
@@ -90,8 +91,8 @@ class Plot:
         )
 
         self.ax.plot(
-            self.config.kp,
-            self.config.kd,
+            self.config_pendulum.kp,
+            self.config_pendulum.kd,
             0,
             color="blue",
             marker="X",
@@ -154,17 +155,17 @@ class Plot:
 
         self.ax4.set_title(
             r"k_star =  [{} {} and k_hat = [{} {}]], error: {}".format(
-                self.config.kp, self.config.kd, x_min[0], x_min[1], y_min
+                self.config_pendulum.kp, self.config_pendulum.kd, x_min[0], x_min[1], y_min
             )
         )
         self.ax4.plot(y_min_buffer)
 
         self.ax2.plot(self.X_star[:, 0], color="red")
         self.ax2.plot(
-            self.config.pi * np.ones(self.X_star.shape[0]), color="red", label="ideal"
+            self.config_pendulum.pi * np.ones(self.X_star.shape[0]), color="red", label="ideal"
         )
         self.ax3.plot(
-            self.config.pi * np.ones(self.X_star.shape[0]), color="red", label="ideal"
+            self.config_pendulum.pi * np.ones(self.X_star.shape[0]), color="red", label="ideal"
         )
         self.ax2.legend()
         self.ax3.legend()

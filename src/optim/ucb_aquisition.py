@@ -26,15 +26,6 @@ class UCBAquisition:
         )
         return x.mean - np.sqrt(beta_t) * self.c.scale_beta * x.variance
 
-    def ei_loss(self, x):
-        m = x.mean
-        sigma = x.variance.clamp_min(1e-9).sqrt()
-        u = -(m - self.yMin.expand_as(m) + 10) / sigma
-        dist = torch.distributions.normal.Normal(
-            torch.zeros_like(u), torch.ones_like(u)
-        )
-        ei = sigma * (dist.cdf(u) + u * torch.exp(dist.log_prob(u)))
-        return -ei
 
     def getInitPoints(self):
         if self.c.ucb_use_set:
@@ -75,7 +66,7 @@ class UCBAquisition:
         )
         scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
-        aquisition = self.ei_loss if self.c.aquisition == "ei" else self.ucb_loss
+        aquisition = self.ucb_loss
 
         for i in range(training_steps):
             optimizer.zero_grad()

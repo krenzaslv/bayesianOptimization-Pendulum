@@ -11,23 +11,11 @@ from src.tools.logger import load
 from src.tools.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt
 from rich.progress import track
-from src.losses.losses import pendulum_loss
+from src.losses.losses import PendulumError 
+from src.pendulum.config import Config as PendulumConfig
 
 # torch.set_default_dtype(torch.float64)
 app = typer.Typer()
-
-
-@app.command()
-def profile(
-    config_path: str = typer.Option("config.txt", help="Path to config file"),
-):
-    profiler = cProfile.Profile()
-    profiler.enable()
-    train(config_path)
-    profiler.disable()
-    stats = pstats.Stats(profiler).sort_stats("tottime")
-    stats.print_stats()
-
 
 @app.command()
 def make_gif():
@@ -37,60 +25,35 @@ def make_gif():
 @app.command()
 def plot(
     config_path: str = typer.Option("config.txt", help="Path to config file"),
+    config_path_pendulum: str = typer.Option("config_pendulum.txt", help="Path to config file"),
 ):
     clearFiles()
     config = Config(config_path)
+    config_pendulum = PendulumConfig(config_path_pendulum)
     logger = load(config.save_file)
-    torch.manual_seed(config.seed)
-    np.random.seed(config.seed)
-    X_star = simulate(config, dynamics_ideal, U_star)
-    plotter = Plot(X_star, config)
+
+    X_star = simulate(config_pendulum, dynamics_ideal, U_star)
+
+    plotter = Plot(X_star, config, config_pendulum)
     plotter.plot(logger)
     plt.show()
 
-
-@app.command()
-def plot_real(
-    config_path: str = typer.Option("config.txt", help="Path to config file"),
-):
-
-    config = Config(config_path)
-    grid_x = torch.linspace(
-        config.domain_start_p,
-        config.domain_end_p,
-        config.plotting_n_samples,
-    )
-    grid_y = torch.linspace(
-        config.domain_start_d,
-        config.domain_end_d,
-        config.plotting_n_samples,
-    )
-    grid_x, grid_y = torch.meshgrid(grid_x, grid_y, indexing="xy")
-    inp = np.stack((grid_x, grid_y), axis=2)
-    out = np.zeros(shape=(inp.shape[0], inp.shape[1]))
-    X_star = simulate(config, dynamics_ideal, U_star)
-    trainer = Trainer(config, X_star)
-    ax = plt.axes(projection="3d")
-    ax.plot(config.kp, config.kd, 0, marker="X", markersize="20")
-    for i in track(range(inp.shape[0]), description="Simulating..."):
-        for j in range(inp.shape[1]):
-            [x_k, y_k, _] = trainer.loss(inp[i, j])
-            out[i, j] = y_k
-    ax.plot_surface(inp[:, :, 0], inp[:, :, 1], out)
-    plt.show()
 
 
 @app.command()
 def plot_end(
     config_path: str = typer.Option("config.txt", help="Path to config file"),
+    config_path_pendulum: str = typer.Option("config_pendulum.txt", help="Path to config file"),
 ):
     clearFiles()
     config = Config(config_path)
+    config_pendulum = PendulumConfig(config_path_pendulum)
+
     logger = load(config.save_file)
-    torch.manual_seed(config.seed)
-    np.random.seed(config.seed)
-    X_star = simulate(config, dynamics_ideal, U_star)
-    plotter = Plot(X_star, config)
+    
+    X_star = simulate(config_pendulum, dynamics_ideal, U_star)
+
+    plotter = Plot(X_star, config, config_pendulum)
     endIdx = len(logger.X_buffer) - 1
     plotter.plotIdx(logger, endIdx)
     plt.show()
@@ -99,14 +62,24 @@ def plot_end(
 @app.command()
 def train_pendulum(
     config_path: str = typer.Option("config.txt", help="Path to config file"),
+    config_path_pendulum: str = typer.Option("config_pendulum.txt", help="Path to config file"),
 ):
     config = Config(config_path)
+    config_pendulum = PendulumConfig(config_path_pendulum)
+
+    # TODO temporary hack to include solution in grid
+    config.kp = config_pendulum.kp
+    config.kd = config_pendulum.kd
+
     torch.manual_seed(config.seed)
     np.random.seed(config.seed)
 
-    X_star = simulate(config, dynamics_ideal, U_star)
+    #Pendulum dependent dynamics and losses
+    X_star = simulate(config_pendulum, dynamics_ideal, U_star)
+    loss = PendulumError(X_star, config_pendulum)
+
     trainer = Trainer(config, X_star)
-    trainer.train(pendulum_loss)
+    trainer.train(loss)
     trainer.logger.save(config.save_file)
 
 

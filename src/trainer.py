@@ -53,7 +53,7 @@ class Trainer:
     def train(self, loss):
         train_x = torch.zeros(self.config.n_opt_samples, 2)
         train_y = torch.zeros(self.config.n_opt_samples)
-        k = np.array([self.config.kd_bo, self.config.kp_bo])
+        k = np.array([0, 0])
 
         likelihood = gpytorch.likelihoods.GaussianLikelihood(
             noise_constraint=gpytorch.constraints.GreaterThan(1e-4)
@@ -64,7 +64,7 @@ class Trainer:
         yMin = 1e10
         for i in track(range(self.config.n_opt_samples), description="Training..."):
             # 1. collect Data
-            [x_k, y_k, X_bo] = loss(k, self.X_star, self.config)
+            [x_k, y_k, X_bo] = loss.evaluate(k)
             [train_x[i, :], train_y[i]] = [x_k, y_k]
             xNormalizer = Normalizer2d()
             yNormalizer = Normalizer()
