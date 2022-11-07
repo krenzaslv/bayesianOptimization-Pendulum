@@ -64,7 +64,8 @@ class Trainer:
 
             # 3. Find next k with UCB
             if self.config.aquisition == "UCB":
-                aquisition = UCBAquisition(model, xNormalizer, i, self.config, yMin, self.logger.writer)
+                aquisition = UCBAquisition(model, xNormalizer, i, self.config, self.logger.writer)
+
             [k, loss_ucb] = aquisition.optimize(
                 self.config.n_opt_iterations_aq)
             k = xNormalizer.itransform(k)[0].detach().numpy()
