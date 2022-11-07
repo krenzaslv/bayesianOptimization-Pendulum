@@ -63,7 +63,7 @@ class UCBAquisition:
 
         for i in range(training_steps):
             optimizer.zero_grad()
-            output = self.model(t)
+            output = self.likelihood(self.model(t))
             loss = -aquisition(output).sum()
             loss.backward()
             optimizer.step()

@@ -130,7 +130,7 @@ class PlotPendulum:
 
         inp = self.createGrid()
         with torch.autograd.no_grad():
-            out = model(xNormalizer.transform(inp))
+            out = model.likelihood(model(xNormalizer.transform(inp)))
 
         var = out.variance.detach().numpy()
         mean = out.mean.detach()
