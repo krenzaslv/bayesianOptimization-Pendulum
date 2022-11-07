@@ -17,6 +17,7 @@ class Config:
         self.beta = self.config.getfloat("Optimization", "beta")
         self.dim = self.config.getint("Optimization", "dim")
         self.n_sample_points = self.config.getint("Optimization", "n_sample_points")
+        self.aquisition = self.config.get("Optimization", "aquisition")
         self.ucb_set_n = self.config.getint("Optimization", "ucb_set_n")
         self.n_opt_iterations_aq = self.config.getint(
             "Optimization", "n_opt_iterations_aq"

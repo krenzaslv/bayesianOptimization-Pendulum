@@ -17,7 +17,6 @@ class Trainer:
 
         self.logger = Logger(config)
 
-
     def createModel(self, train_x_n, train_y_n, likelihood):
         mean_module = gpytorch.means.ZeroMean()
         # mean_module = MLPMean()
@@ -46,7 +45,7 @@ class Trainer:
         )
         likelihood.noise = torch.tensor([self.config.init_variance])
 
-        yMin = -1e10 # Something small
+        yMin = -1e10  # Something small
         for i in track(range(self.config.n_opt_samples), description="Training..."):
             # 1. collect Data
             [x_k, y_k, X_bo] = loss.evaluate(k)
@@ -64,10 +63,9 @@ class Trainer:
             model = self.createModel(train_x_n, train_y_n, likelihood)
 
             # 3. Find next k with UCB
-            ucbAquisition = UCBAquisition(
-                model, likelihood, xNormalizer, i, self.config, yMin, self.logger.writer
-            )
-            [k, loss_ucb] = ucbAquisition.optimize(
+            if self.config.aquisition == "UCB":
+                aquisition = UCBAquisition(model, xNormalizer, i, self.config, yMin, self.logger.writer)
+            [k, loss_ucb] = aquisition.optimize(
                 self.config.n_opt_iterations_aq)
             k = xNormalizer.itransform(k)[0].detach().numpy()
 

@@ -36,6 +36,7 @@ class Logger:
                     "weight_decay_aq": self.c.weight_decay_aq,
                     "n_opt_iterations_aq": self.c.n_opt_iterations_aq,
                     "init_lenghtscale": self.c.init_lenghtscale,
+                    "aquisition": self.c.aquisition,
                     "init_variance": self.c.init_variance,
                     "weight_decay_aq": self.c.weight_decay_aq,
                     "n_opt_samples": self.c.n_opt_samples,

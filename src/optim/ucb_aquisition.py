@@ -6,9 +6,8 @@ from src.tools.random import rand2d_torch
 import math
 
 class UCBAquisition:
-    def __init__(self, model, likelihood, xNormalizer, t, c, yMin, logger):
+    def __init__(self, model, xNormalizer, t, c, yMin, logger):
         self.model = model
-        self.likelihood = likelihood
         self.xNormalizer = xNormalizer
         self.t = t + 1
         self.c = c
@@ -50,7 +49,6 @@ class UCBAquisition:
 
     def optimize(self, training_steps):
         self.model.eval()
-        self.likelihood.eval()
 
         t = self.getInitPoints()
 
@@ -63,7 +61,7 @@ class UCBAquisition:
 
         for i in range(training_steps):
             optimizer.zero_grad()
-            output = self.likelihood(self.model(t))
+            output = self.model.likelihood(self.model(t))
             loss = -aquisition(output).sum()
             loss.backward()
             optimizer.step()
