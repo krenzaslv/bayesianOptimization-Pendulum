@@ -23,21 +23,7 @@ class Trainer:
         # mean_module = MLPMean()
 
         covar_module = gpytorch.kernels.ScaleKernel(
-            gpytorch.kernels.MaternKernel(
-                lengthscale_prior=gpytorch.priors.MultivariateNormalPrior(
-                    loc=torch.tensor(
-                        [self.config.init_lenghtscale,
-                            self.config.init_lenghtscale]
-                    ),
-                    covariance_matrix=torch.tensor(
-                        [
-                            [self.config.init_variance, 0.0],
-                            [0.0, self.config.init_variance],
-                        ]
-                    ),
-                ),
-                ard_num_dims=2,
-            )
+            gpytorch.kernels.MaternKernel()
         )
         covar_module.base_kernel.lengthscale = self.config.init_lenghtscale
 
@@ -51,17 +37,16 @@ class Trainer:
         return model
 
     def train(self, loss):
-        train_x = torch.zeros(self.config.n_opt_samples, 2)
+        train_x = torch.zeros(self.config.n_opt_samples, self.config.dim)
         train_y = torch.zeros(self.config.n_opt_samples)
-        k = np.array([0, 0])
+        k = np.zeros(self.config.dim)
 
         likelihood = gpytorch.likelihoods.GaussianLikelihood(
             noise_constraint=gpytorch.constraints.GreaterThan(1e-4)
         )
-        likelihood.noise = torch.tensor([1e-4])
-        likelihood.noise_covar.raw_noise.requires_grad_(False)  # Dont optimize
+        likelihood.noise = torch.tensor([self.config.init_variance])
 
-        yMin = -1e10
+        yMin = -1e10 # Something small
         for i in track(range(self.config.n_opt_samples), description="Training..."):
             # 1. collect Data
             [x_k, y_k, X_bo] = loss.evaluate(k)

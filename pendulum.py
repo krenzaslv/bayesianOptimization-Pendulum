@@ -4,9 +4,8 @@ from src.trainer import Trainer
 from src.pendulum.simulator import simulate
 from src.pendulum.dynamics import dynamics_ideal, U_star
 from src.config import Config
-from src.tools.plot import PlotPendulum
+from src.pendulum.plot import PlotPendulum
 import torch
-import cProfile, pstats
 from src.tools.logger import load
 from src.tools.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt

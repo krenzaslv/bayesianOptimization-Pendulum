@@ -29,12 +29,6 @@ class Logger:
 
         self.writer.add_scalar("Loss/Aquisition", loss_aq, i)
         self.writer.add_scalar("Loss/yMin", self.y_min_buffer[i], i)
-        self.writer.add_scalar(
-            "GP/lengthscale_p", model.covar_module.base_kernel.lengthscale[0, 0], i
-        )
-        self.writer.add_scalar(
-            "GP/lengthscale_d", model.covar_module.base_kernel.lengthscale[0, 1], i
-        )
         if i == self.c.n_opt_samples - 1:
             self.writer.add_hparams(
                 {

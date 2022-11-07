@@ -1,6 +1,4 @@
 from configparser import ConfigParser
-import numpy as np
-
 
 class Config:
     def __init__(self, path):
@@ -17,6 +15,7 @@ class Config:
         self.init_lenghtscale = self.config.getfloat("Optimization", "init_lenghtscale")
         self.init_variance = self.config.getfloat("Optimization", "init_variance")
         self.beta = self.config.getfloat("Optimization", "beta")
+        self.dim = self.config.getint("Optimization", "dim")
         self.n_sample_points = self.config.getint("Optimization", "n_sample_points")
         self.ucb_set_n = self.config.getint("Optimization", "ucb_set_n")
         self.n_opt_iterations_aq = self.config.getint(
