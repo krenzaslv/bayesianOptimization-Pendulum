@@ -14,6 +14,7 @@ class Config:
         self.weight_decay_aq = self.config.getfloat("Optimization", "weight_decay_aq")
         self.init_lenghtscale = self.config.getfloat("Optimization", "init_lenghtscale")
         self.init_variance = self.config.getfloat("Optimization", "init_variance")
+        self.skip_aready_samples = self.config.getboolean("Optimization","skip_aready_samples")
         self.beta = self.config.getfloat("Optimization", "beta")
         self.dim = self.config.getint("Optimization", "dim")
         self.n_sample_points = self.config.getint("Optimization", "n_sample_points")

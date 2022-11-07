@@ -38,6 +38,9 @@ beta = 1
 ; Use finite linearly spaced subset instead of continous
 ucb_use_set = True 
 
+; Skip already sampled points
+skip_aready_samples = True 
+
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
 ucb_set_n = 100
 

@@ -1,4 +1,3 @@
-import torch
 import numpy as np
 from src.optim.base_aquisition import BaseAquisition
 

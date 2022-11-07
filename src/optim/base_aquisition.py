@@ -66,10 +66,11 @@ class BaseAquisition:
         
         #Take next best value if already sampled. If not done leads to singular
         #matrix for finite grid
-        k = 1
-        while t[minIdx] in self.model.train_inputs[0]:
-            k += 1
-            _ ,minIdx = torch.kthvalue(loss, k)
+        if(self.c.skip_aready_samples):
+            k = 1
+            while t[minIdx] in self.model.train_inputs[0]:
+                k += 1
+                _ ,minIdx = torch.kthvalue(loss, k)
 
         return [t[minIdx], loss[minIdx]]
 

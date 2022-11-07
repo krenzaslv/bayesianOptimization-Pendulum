@@ -27,3 +27,4 @@ class Config:
         self.kd = self.config.getfloat("Controller", "kd")
         self.kp_bo = self.config.getfloat("Controller", "kp_bo")
         self.kd_bo = self.config.getfloat("Controller", "kd_bo")
+        self.eps = self.config.getfloat("Controller", "eps")
