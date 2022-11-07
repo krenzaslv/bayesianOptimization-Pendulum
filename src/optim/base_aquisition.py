@@ -64,8 +64,6 @@ class BaseAquisition:
 
         minIdx = torch.argmin(loss)
         
-        #Take next best value if already sampled. If not done leads to singular
-        #matrix for finite grid
         if(self.c.skip_aready_samples):
             k = 1
             while t[minIdx] in self.model.train_inputs[0]:

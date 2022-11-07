@@ -30,10 +30,10 @@ init_lenghtscale = 0.5
 init_variance = 0.0001
 
 ; Scale factor for beta
-scale_beta = 3 
+scale_beta = 1 
 
 ; Beta for UCB 
-beta = 1
+beta = 2
 
 ; Use finite linearly spaced subset instead of continous
 ucb_use_set = True 
