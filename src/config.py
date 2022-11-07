@@ -16,7 +16,6 @@ class Config:
         self.weight_decay_aq = self.config.getfloat("Optimization", "weight_decay_aq")
         self.init_lenghtscale = self.config.getfloat("Optimization", "init_lenghtscale")
         self.init_variance = self.config.getfloat("Optimization", "init_variance")
-        self.gamma = self.config.getfloat("Optimization", "gamma")
         self.beta = self.config.getfloat("Optimization", "beta")
         self.n_sample_points = self.config.getint("Optimization", "n_sample_points")
         self.ucb_set_n = self.config.getint("Optimization", "ucb_set_n")
@@ -25,7 +24,6 @@ class Config:
         )
         self.n_opt_samples = self.config.getint("Optimization", "n_opt_samples")
         self.ucb_use_set = self.config.getboolean("Optimization", "ucb_use_set")
-        self.beta_fixed = self.config.getboolean("Optimization", "beta_fixed")
 
         self.plotting_n_samples = self.config.getint("Plotting", "plotting_n_samples")
 

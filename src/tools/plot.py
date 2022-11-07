@@ -135,9 +135,9 @@ class PlotPendulum:
         var = out.variance.detach().numpy()
         mean = out.mean.detach()
 
-        minIdx = np.argmin(y[: i + 1])
-        x_min = x[minIdx]
-        y_min = y[minIdx]
+        maxIdx = np.argmax(y[: i + 1])
+        x_min = x[maxIdx]
+        y_min = y[maxIdx]
 
         self.plotSurface(
             i, inp, mean, var, x, y, x_min, y_min, xNormalizer, yNormalizer, model
@@ -146,12 +146,12 @@ class PlotPendulum:
         for X_k in X:
             self.ax2.plot(X_k[:, 0], color="blue", alpha=0.1)
         self.ax2.plot(logger.X_buffer[0][:, 0], color="orange", label="initial")
-        self.ax2.plot(logger.X_buffer[minIdx][:, 0], color="green", label="bestfound")
+        self.ax2.plot(logger.X_buffer[maxIdx][:, 0], color="green", label="bestfound")
 
         for X_k in X:
             self.ax3.plot(X_k[:, 1], color="blue", alpha=0.1)
         self.ax3.plot(logger.X_buffer[0][:, 1], color="orange", label="initial")
-        self.ax3.plot(logger.X_buffer[minIdx][:, 1], color="green", label="bestfound")
+        self.ax3.plot(logger.X_buffer[maxIdx][:, 1], color="green", label="bestfound")
 
         self.ax4.set_title(
             r"k_star =  [{} {} and k_hat = [{} {}]], error: {}".format(

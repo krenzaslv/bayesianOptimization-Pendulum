@@ -17,15 +17,7 @@ class UCBAquisition:
         self.minIdxBuffer = []
 
     def ucb_loss(self, x):
-        D = (self.c.domain_end_p - self.c.domain_start_p) * (
-            self.c.domain_end_d - self.c.domain_start_d
-        )
-        beta_t = (
-            self.c.beta
-            if self.c.beta_fixed
-            else 2 * np.log(D * (self.t) * (self.t) * math.pi / (6 * self.c.gamma))
-        )
-        return x.mean + np.sqrt(beta_t) * self.c.scale_beta * x.variance
+        return x.mean + np.sqrt(self.c.beta) * self.c.scale_beta * x.variance
 
 
     def getInitPoints(self):
