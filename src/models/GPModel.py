@@ -3,6 +3,13 @@ import gpytorch
 from torch.nn import Sequential, ReLU, Linear
 
 
+class ConstrainedExactGPModel:
+    def __init__(self, train_x, train_y, likelihoods, mean_modules, covar_modules):
+        self.models = [ExactGPModel(train_x,
+                                    train_y[:, i], likelihoods[i], mean_modules[i], covar_modules[i])
+                       for i in range(train_y.shape[1])]
+
+
 class ExactGPModel(gpytorch.models.ExactGP):
     def __init__(self, train_x, train_y, likelihood, mean_module, covar_module):
         super(ExactGPModel, self).__init__(train_x, train_y, likelihood)

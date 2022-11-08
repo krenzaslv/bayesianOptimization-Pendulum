@@ -3,7 +3,7 @@ import numpy as np
 from rich.progress import track
 import torch
 
-from src.models.GPModel import ExactGPModel
+from src.models.GPModel import ExactGPModel, ConstrainedExactGPModel
 from src.tools.logger import Logger
 from src.tools.normalizer import Normalizer, Normalizer2d
 from src.optim.optimizer import GPOptimizer
@@ -28,22 +28,30 @@ class Trainer:
 
         model = ExactGPModel(
             train_x_n,
-            train_y_n,
+            train_y_n[:,0],
             likelihood,
             mean_module,
             covar_module,
+        )
+        test = ConstrainedExactGPModel(
+            train_x_n,
+            train_y_n,
+            [likelihood],
+            [mean_module],
+            [covar_module],
         )
         return model
 
     def train(self, loss):
         train_x = torch.zeros(self.config.n_opt_samples, self.config.dim)
-        train_y = torch.zeros(self.config.n_opt_samples)
+        train_y = torch.zeros(self.config.n_opt_samples,1)
         k = np.zeros(self.config.dim)
 
         likelihood = gpytorch.likelihoods.GaussianLikelihood(
             noise_constraint=gpytorch.constraints.GreaterThan(1e-4)
         )
         likelihood.noise = torch.tensor([self.config.init_variance])
+        
 
         yMin = -1e10  # Something small
         for i in track(range(self.config.n_opt_samples), description="Training..."):
