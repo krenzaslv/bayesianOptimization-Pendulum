@@ -3,23 +3,50 @@ import gpytorch
 from torch.nn import Sequential, ReLU, Linear
 
 
-class ConstrainedExactGPModel:
-    def __init__(self, train_x, train_y, likelihoods, mean_modules, covar_modules):
-        self.models = [ExactGPModel(train_x,
-                                    train_y[:, i], likelihoods[i], mean_modules[i], covar_modules[i])
-                       for i in range(train_y.shape[1])]
+class BatchIndependentMultitaskGPModel(gpytorch.models.ExactGP):
+    def __init__(self, train_x, train_y, likelihood):
+        likelihood = gpytorch.likelihoods.MultitaskGaussianLikelihood(config.num_constraints)(
+            noise_constraint=gpytorch.constraints.GreaterThan(1e-4)
+        )
+        likelihood.noise = torch.tensor([config.init_variance])
+        super().__init__(train_x, train_y, likelihood)
+        self.mean_module = gpytorch.means.ConstantMean(batch_shape=torch.Size([config.num_constraints]))
+        self.covar_module = gpytorch.kernels.ScaleKernel(
+            gpytorch.kernels.RBFKernel(batch_shape=torch.Size([2])),
+            batch_shape=torch.Size([config.num_constraints])
+        )
+
+    def forward(self, x):
+        mean_x = self.mean_module(x)
+        covar_x = self.covar_module(x)
+        return gpytorch.distributions.MultitaskMultivariateNormal.from_batch_mvn(
+            gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
+        )
 
 
 class ExactGPModel(gpytorch.models.ExactGP):
-    def __init__(self, train_x, train_y, likelihood, mean_module, covar_module):
+    def __init__(self, config, train_x=torch.zeros(1, 2), train_y=torch.zeros(1)):
+        likelihood = gpytorch.likelihoods.GaussianLikelihood(
+            noise_constraint=gpytorch.constraints.GreaterThan(1e-4)
+        )
+        likelihood.noise = torch.tensor([config.init_variance])
         super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
-        self.mean_module = mean_module
-        self.covar_module = covar_module
+
+        self.config = config
+        self.mean_module = gpytorch.means.ZeroMean()
+        self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.MaternKernel())
+        self.covar_module.base_kernel.lengthscale = config.init_lenghtscale
+
 
     def forward(self, x):
         mean_x = self.mean_module(x)
         covar_x = self.covar_module(x)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
+
+    def updateModel(self, train_x, train_y):
+        super().set_train_data(train_x, train_y, strict=False)
+
+    
 
 
 class MLPMean(gpytorch.means.Mean):

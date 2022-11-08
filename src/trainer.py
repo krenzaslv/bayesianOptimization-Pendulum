@@ -3,7 +3,6 @@ import numpy as np
 from rich.progress import track
 import torch
 
-from src.models.GPModel import ExactGPModel, ConstrainedExactGPModel
 from src.tools.logger import Logger
 from src.tools.normalizer import Normalizer, Normalizer2d
 from src.optim.optimizer import GPOptimizer
@@ -17,32 +16,8 @@ class Trainer:
 
         self.logger = Logger(config)
 
-    def createModel(self, train_x_n, train_y_n, likelihood):
-        mean_module = gpytorch.means.ZeroMean()
-        # mean_module = MLPMean()
 
-        covar_module = gpytorch.kernels.ScaleKernel(
-            gpytorch.kernels.MaternKernel()
-        )
-        covar_module.base_kernel.lengthscale = self.config.init_lenghtscale
-
-        model = ExactGPModel(
-            train_x_n,
-            train_y_n[:,0],
-            likelihood,
-            mean_module,
-            covar_module,
-        )
-        test = ConstrainedExactGPModel(
-            train_x_n,
-            train_y_n,
-            [likelihood],
-            [mean_module],
-            [covar_module],
-        )
-        return model
-
-    def train(self, loss):
+    def train(self, loss, model):
         train_x = torch.zeros(self.config.n_opt_samples, self.config.dim)
         train_y = torch.zeros(self.config.n_opt_samples,1)
         k = np.zeros(self.config.dim)
@@ -68,7 +43,8 @@ class Trainer:
                 print("Iteration: {}, yMin: {}".format(i, yMin))
 
             # 2. Update GP
-            model = self.createModel(train_x_n, train_y_n, likelihood)
+            model.updateModel(train_x_n, train_y_n[:,0])
+
 
             # 3. Find next k with UCB
             if self.config.aquisition == "UCB":

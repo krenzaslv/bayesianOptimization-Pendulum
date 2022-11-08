@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from rich.progress import track
 from src.losses.losses import PendulumError 
 from src.pendulum.config import Config as PendulumConfig
+from src.models.GPModel import ExactGPModel
 
 # torch.set_default_dtype(torch.float64)
 app = typer.Typer()
@@ -77,8 +78,10 @@ def train(
     X_star = simulate(config_pendulum, dynamics_ideal, U_star)
     loss = PendulumError(X_star, config_pendulum)
 
+    model = ExactGPModel(config)
+
     trainer = Trainer(config, X_star)
-    trainer.train(loss)
+    trainer.train(loss, model)
     trainer.logger.save(config.save_file)
 
 
