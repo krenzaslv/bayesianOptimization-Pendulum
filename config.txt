@@ -9,9 +9,6 @@ n_opt_samples = 50
 ; Dimension of paramerers
 dim = 2
 
-; num constraints + 1
-num_constraints = 2
-
 ; Number of Optimizationsteps for finding Aquisition optimum. Set to 0 for no Optimization
 n_opt_iterations_aq = 0 
 lr_aq = 0.001

@@ -21,11 +21,14 @@ class Logger:
         self.X_buffer.append(X_k)
         self.model_buffer.append(model)
         self.x_k_buffer.append(x_k)
-        self.y_k_buffer.append(y_k)
+        self.y_k_buffer.append(y_k if y_k.dim == 1 else y_k[0])
         self.xNormalizer_buffer.append(xNormalizer)
         self.yNormalizer_buffer.append(yNormalizer)
-        minIdx = np.argmin(np.array(self.y_k_buffer))
+        ykBuffer = np.array(self.y_k_buffer)
+        minIdx = np.argmin(ykBuffer)
         self.y_min_buffer.append(self.y_k_buffer[minIdx])
+
+        loss_aq = loss_aq if loss_aq.dim() == 0 else loss_aq[0]
 
         self.writer.add_scalar("Loss/Aquisition", loss_aq, i)
         self.writer.add_scalar("Loss/yMin", self.y_min_buffer[i], i)

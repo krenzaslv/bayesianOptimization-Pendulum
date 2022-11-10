@@ -59,6 +59,7 @@ class PlotPendulum:
         )
         grid_x, grid_y = torch.meshgrid(grid_x, grid_y, indexing="xy")
         inp = torch.stack((grid_x, grid_y), dim=2).float()
+        # inp= torch.reshape(inp, (-1, 2))
         return inp
 
     def plotSurface(
@@ -67,7 +68,7 @@ class PlotPendulum:
         self.ax.plot_surface(
             inp[:, :, 0],
             inp[:, :, 1],
-            yNormalizer.itransform(mean),
+            yNormalizer.itransform(mean)[:,0],
             vmax=10,
             alpha=0.3,
             facecolors=cm.jet(var / np.amax(var)),

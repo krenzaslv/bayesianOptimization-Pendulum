@@ -4,12 +4,13 @@ from src.tools.random import rand2d_torch
 
 class BaseAquisition:
 
-    def __init__(self, model, xNormalizer, t, c, logger):
+    def __init__(self, model, xNormalizer, t, c, logger, dim):
         self.model = model
         self.xNormalizer = xNormalizer
         self.t = t + 1
         self.c = c
         self.logger = logger
+        self.dim = dim
 
     def getInitPoints(self):
         if self.c.ucb_use_set:
@@ -39,36 +40,20 @@ class BaseAquisition:
         )
         return t
 
-    def optimize(self, training_steps):
+    def optimize(self):
         self.model.eval()
 
         t = self.getInitPoints()
 
-        optimizer = torch.optim.Adam(
-            [t], self.c.lr_aq, weight_decay=self.c.weight_decay_aq
-        )
-        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+        loss = -self.loss(self.model(t)) # TODO maybe use likelihood
+        loss_perf = loss if loss.dim() == 1 else loss[:,0]
+        minIdx = torch.argmin(loss_perf)        
 
-        for i in range(training_steps):
-            optimizer.zero_grad()
-            output = self.model.likelihood(self.model(t))
-            loss = -self.loss(output).sum()
-            loss.backward()
-            optimizer.step()
-            scheduler.step()
-            if self.t == self.c.n_opt_samples - 1:
-                loss = aquisition(self.model(t))
-                self.logger.add_scalar("Loss/AQ_LAST", loss.min(), i)
-
-        loss = -self.loss(self.model(t))
-
-        minIdx = torch.argmin(loss)
-        
         if(self.c.skip_aready_samples):
             k = 1
             while t[minIdx] in self.model.train_inputs[0]:
                 k += 1
-                _ ,minIdx = torch.kthvalue(loss, k)
+                _ ,minIdx = torch.kthvalue(loss_perf, k)
 
         return [t[minIdx], loss[minIdx]]
 

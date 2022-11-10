@@ -17,7 +17,6 @@ class Config:
         self.skip_aready_samples = self.config.getboolean("Optimization","skip_aready_samples")
         self.beta = self.config.getfloat("Optimization", "beta")
         self.dim = self.config.getint("Optimization", "dim")
-        self.num_constraints = self.config.getint("Optimization","num_constraints")
         self.n_sample_points = self.config.getint("Optimization", "n_sample_points")
         self.aquisition = self.config.get("Optimization", "aquisition")
         self.ucb_set_n = self.config.getint("Optimization", "ucb_set_n")

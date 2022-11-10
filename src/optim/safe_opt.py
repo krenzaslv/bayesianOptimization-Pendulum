@@ -1,82 +1,35 @@
+from src.optim.base_aquisition import BaseAquisition
 import torch
-import gpytorch
-from torch.autograd import Variable
-import numpy as np
-from src.tools.random import rand2d_torch
-import math
 
-class SafeOptAquisition:
-    def __init__(self, model, xNormalizer, t, c, logger):
-        self.model = model
-        self.xNormalizer = xNormalizer
-        self.t = t + 1
-        self.c = c
-        self.logger = logger
-        self.minIdxBuffer = []
-
-    def ucb_loss(self, x):
-        return x.mean + np.sqrt(self.c.beta) * self.c.scale_beta * x.variance
+class SafeOpt(BaseAquisition):
+    def __init__(self, model, xNormalizer, t, c, logger, dim):
+        super().__init__(model, xNormalizer, t, c, logger, dim)
+        inputs = self.getInitPoints()
+        self.Q_l = torch.empty(inputs.shape[0], dim)
+        self.Q_u = torch.empty(inputs.shape[0], dim)
+        self.S = torch.zeros(inputs.shape[0], dim, dtype=bool)
+        self.G = self.S.clone()
+        self.M = self.S.clone()
+        self.fmin = 0
 
 
-    def getInitPoints(self):
-        if self.c.ucb_use_set:
-            xs = torch.linspace(
-                self.c.domain_start_p, self.c.domain_end_p, self.c.ucb_set_n
-            )
-            ys = torch.linspace(
-                self.c.domain_start_d, self.c.domain_end_d, self.c.ucb_set_n
-            )
-            x, y = torch.meshgrid(xs, ys, indexing="xy")
-            init = torch.stack((x, y), dim=2)
-            init = torch.reshape(init, (-1, 2))
-            init = torch.cat((init, torch.tensor([[self.c.kp, self.c.kd]])), 0)
+    def loss(self, x):
+        # Update confidence interval
+        self.Q_l = x.mean - self.c.beta*torch.sqrt(x.variance)
+        self.Q_u = x.mean + self.c.beta*torch.sqrt(x.variance)
 
-        else:
-            init = rand2d_torch(
-                self.c.domain_start_p,
-                self.c.domain_end_p,
-                self.c.domain_start_d,
-                self.c.domain_end_d,
-                self.c.n_sample_points,
-            )
+        #Compute Safe Set
+        self.S = torch.all(self.Q_l > self.fmin, axis=1)
 
-        t = Variable(
-            self.xNormalizer.transform(init),
-            requires_grad=True,
-        )
-        return t
+        # Set if maximisers
+        self.M[:] = False
+        print(self.Q_u.shape)
+        print(self.S.shape)
+        print(self.Q_u[self.S, 0])
+        self.M[self.S] = self.Q_u[self.S, 0]# >= torch.max(self.Q_l[self.S, 0])
+        # max_var = torch.max(self.Q_u[self.M] - self.Q_l[self.M]) / self.scaling[0]
 
-    def optimize(self, training_steps):
-        self.model.eval()
-
-        t = self.getInitPoints()
-
-        optimizer = torch.optim.Adam(
-            [t], self.c.lr_aq, weight_decay=self.c.weight_decay_aq
-        )
-        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
-
-        aquisition = self.ucb_loss
-
-        for i in range(training_steps):
-            optimizer.zero_grad()
-            output = self.model.likelihood(self.model(t))
-            loss = -aquisition(output).sum()
-            loss.backward()
-            optimizer.step()
-            scheduler.step()
-            if self.t == self.c.n_opt_samples - 1:
-                loss = aquisition(self.model(t))
-                self.logger.add_scalar("Loss/AQ_LAST", loss.min(), i)
-
-        loss = -aquisition(self.model(t))
-
-        minIdx = torch.argmin(loss)
-        
-        #Take next best value if already sampled
-        k = 1
-        while t[minIdx] in self.model.train_inputs[0]:
-            k += 1
-            _ ,minIdx = torch.kthvalue(loss, k)
-
-        return [t[minIdx], loss[minIdx]]
+        print(self.Q_l)
+        print(self.S)
+        return x.mean + self.c.scale_beta*torch.sqrt(self.c.beta*x.variance)
+    
