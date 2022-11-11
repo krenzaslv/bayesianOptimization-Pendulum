@@ -35,13 +35,9 @@ class Logger:
         if i == self.c.n_opt_samples - 1:
             self.writer.add_hparams(
                 {
-                    "lr_aq": self.c.lr_aq,
-                    "weight_decay_aq": self.c.weight_decay_aq,
-                    "n_opt_iterations_aq": self.c.n_opt_iterations_aq,
                     "init_lenghtscale": self.c.init_lenghtscale,
                     "aquisition": self.c.aquisition,
                     "init_variance": self.c.init_variance,
-                    "weight_decay_aq": self.c.weight_decay_aq,
                     "n_opt_samples": self.c.n_opt_samples,
                     "beta": self.c.beta,
                     "ucb_use_set": self.c.ucb_use_set,

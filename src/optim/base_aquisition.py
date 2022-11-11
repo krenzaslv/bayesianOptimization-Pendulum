@@ -4,9 +4,10 @@ from src.tools.random import rand2d_torch
 
 class BaseAquisition:
 
-    def __init__(self, model, xNormalizer, t, c, logger, dim):
+    def __init__(self, model, xNormalizer, yNormalizer, t, c, logger, dim):
         self.model = model
         self.xNormalizer = xNormalizer
+        self.yNormalizer = yNormalizer
         self.t = t + 1
         self.c = c
         self.logger = logger

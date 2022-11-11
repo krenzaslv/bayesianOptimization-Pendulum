@@ -21,6 +21,7 @@ class SafeOpt(BaseAquisition):
         #TODO first initial safe set... Safe set with normalization?
         #Compute Safe Set
         self.S[:] = torch.all(self.yNormalizer.itransform(self.Q[:,::2])[:,1:] > self.fmin, axis=1)
+        print(self.Q[self.S].shape)
 
         # # Set if maximisers
         # self.M[:] = False
@@ -47,7 +48,6 @@ class SafeOpt(BaseAquisition):
         # self.G[:] = False
         tmp = x.mean + self.c.scale_beta*torch.sqrt(self.c.beta*x.variance)
         tmp[~self.S] = -1e10
-        return x.mean + self.c.scale_beta*torch.sqrt(self.c.beta*x.variance)
         return tmp
 
  

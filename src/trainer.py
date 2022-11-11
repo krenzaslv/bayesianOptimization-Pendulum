@@ -38,11 +38,9 @@ class Trainer:
             model.updateModel(train_x_n, train_y_n)
 
             # 3. Find next k 
-            if self.config.aquisition == "SafeOpt":
-                aquisition = SafeOpt(model, xNormalizer, yNormalizer, i, self.config, self.logger.writer, loss.dim)
-            else:
-                aquisition = UCBAquisition(model, xNormalizer, i, self.config, self.logger.writer, loss.dim)
+            aquisition= SafeOpt if self.config.aquisition == "SafeOpt" else UCBAquisition
 
+            aquisition = aquisition(model, xNormalizer, yNormalizer, i, self.config, self.logger.writer, loss.dim)
             [k, loss_ucb] = aquisition.optimize()
             k = xNormalizer.itransform(k)[0].detach().numpy()
 

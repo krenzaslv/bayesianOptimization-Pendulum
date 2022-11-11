@@ -65,13 +65,14 @@ class PlotPendulum:
     def plotSurface(
         self, i, inp, mean, var, x, y, x_min, y_min, xNormalizer, yNormalizer, model
     ):
+        inp = inp.reshape(self.config.plotting_n_samples,self.config.plotting_n_samples, 2)
         self.ax.plot_surface(
             inp[:, :, 0],
             inp[:, :, 1],
-            yNormalizer.itransform(mean)[:,0],
+            yNormalizer.itransform(mean)[:,0].reshape(self.config.plotting_n_samples,self.config.plotting_n_samples),
             vmax=10,
             alpha=0.3,
-            facecolors=cm.jet(var / np.amax(var)),
+            facecolors=cm.jet(var[:,0] .reshape(self.config.plotting_n_samples,self.config.plotting_n_samples)/ np.amax(var)),
         )
 
         self.ax.scatter(
@@ -129,7 +130,7 @@ class PlotPendulum:
             y_min_buffer,
         ] = logger.getDataFromEpoch(i)
 
-        inp = self.createGrid()
+        inp = self.createGrid().reshape(-1,2)
         with torch.autograd.no_grad():
             out = model.likelihood(model(xNormalizer.transform(inp)))
 

@@ -4,18 +4,13 @@ save_file = data.txt
 
 [Optimization]
 ; Number of Bayesian Optimization steps
-n_opt_samples = 50 
+n_opt_samples = 1
 
 ; Dimension of paramerers
 dim = 2
 
-; Number of Optimizationsteps for finding Aquisition optimum. Set to 0 for no Optimization
-n_opt_iterations_aq = 0 
-lr_aq = 0.001
-weight_decay_aq = 0.0
-
 ; Aquisition must be in [UCB, SafeOpt]
-aquisition=SafeOpt
+aquisition=UPC
 
 ; Domain bounds for Bayesian optimization
 domain_start_p=-4
