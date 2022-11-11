@@ -20,7 +20,8 @@ class PlotPendulum:
         self.fig = plt.figure()
         sns.set_theme()
         grid = self.fig.add_gridspec(3, 2)
-        self.ax = self.fig.add_subplot(grid[:, 0], projection="3d")
+        self.ax = self.fig.add_subplot(grid[:2, 0], projection="3d")
+        self.ax5 = self.fig.add_subplot(grid[2, 0])
         self.ax2 = self.fig.add_subplot(grid[0, 1])
         self.ax3 = self.fig.add_subplot(grid[1, 1])
         self.ax4 = self.fig.add_subplot(grid[2, 1])
@@ -30,6 +31,7 @@ class PlotPendulum:
         self.ax2.clear()
         self.ax3.clear()
         self.ax4.clear()
+        self.ax5.clear()
         self.ax.set_ylim(self.config.domain_start_d, self.config.domain_end_d)
         self.ax.set_xlim(self.config.domain_start_p, self.config.domain_end_p)
         self.ax.set_ylabel("kp")
@@ -65,10 +67,45 @@ class PlotPendulum:
     def plotSurface(
         self, i, inp, mean, var, x, y, x_min, y_min, xNormalizer, yNormalizer, model
     ):
-        inp = inp.reshape(self.config.plotting_n_samples,self.config.plotting_n_samples, 2)
+        _inp = inp.reshape(self.config.plotting_n_samples,self.config.plotting_n_samples, 2)
+        self.ax5.contourf(
+            _inp[:, :, 0],
+            _inp[:, :, 1],
+            yNormalizer.itransform(mean)[:,0].reshape(self.config.plotting_n_samples,self.config.plotting_n_samples),
+            cmap=cm.RdBu,
+            levels=50
+        )
+        self.ax5.scatter(
+            x[:i, 0],
+            x[:i, 1],
+            color="red",
+            marker="o",
+        )
+        self.ax5.plot(
+            x[i, 0],
+            x[i, 1],
+            color="red",
+            marker="X",
+            markersize=40,
+        )
+        self.ax5.plot(
+            self.config_pendulum.kp,
+            self.config_pendulum.kd,
+            color="blue",
+            marker="X",
+            markersize=20,
+        )
+        self.ax5.plot(
+            x_min[0],
+            x_min[1],
+            color="black",
+            marker="X",
+            markersize=20,
+        )
+
         self.ax.plot_surface(
-            inp[:, :, 0],
-            inp[:, :, 1],
+            _inp[:, :, 0],
+            _inp[:, :, 1],
             yNormalizer.itransform(mean)[:,0].reshape(self.config.plotting_n_samples,self.config.plotting_n_samples),
             vmax=10,
             alpha=0.3,
