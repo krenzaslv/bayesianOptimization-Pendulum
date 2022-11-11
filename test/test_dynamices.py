@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import torch
 
-from src.dynamics import dynamics_ideal, dynamics_real, U_star, U_bo, U_pert
+from src.pendulum.dynamics import dynamics_ideal, dynamics_real, U_star, U_bo, U_pert
 
 torch.set_default_dtype(torch.float64)
 
@@ -17,7 +17,7 @@ class MockConfig:
         self.kd_bo = 1
         self.m = 1
         self.g = 9.81
-        self.l = 1
+        self.L = 1
         self.dt = 5
         self.pi = 0
         self.max_torque = 1e10

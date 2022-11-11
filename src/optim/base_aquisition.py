@@ -45,9 +45,9 @@ class BaseAquisition:
 
         t = self.getInitPoints()
 
-        loss = -self.loss(self.model(t)) # TODO maybe use likelihood
+        loss = -self.loss(self.model(t)) 
         loss_perf = loss if loss.dim() == 1 else loss[:,0]
-        minIdx = torch.argmin(loss_perf)        
+        minIdx = torch.argmin(loss_perf)       
 
         if(self.c.skip_aready_samples):
             k = 1

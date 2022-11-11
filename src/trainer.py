@@ -37,9 +37,9 @@ class Trainer:
             # 2. Update GP
             model.updateModel(train_x_n, train_y_n)
 
-            # 3. Find next k with UCB
+            # 3. Find next k 
             if self.config.aquisition == "SafeOpt":
-                aquisition = SafeOpt(model, xNormalizer, i, self.config, self.logger.writer, loss.dim)
+                aquisition = SafeOpt(model, xNormalizer, yNormalizer, i, self.config, self.logger.writer, loss.dim)
             else:
                 aquisition = UCBAquisition(model, xNormalizer, i, self.config, self.logger.writer, loss.dim)
 

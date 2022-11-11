@@ -15,7 +15,7 @@ lr_aq = 0.001
 weight_decay_aq = 0.0
 
 ; Aquisition must be in [UCB, SafeOpt]
-aquisition=UCB
+aquisition=SafeOpt
 
 ; Domain bounds for Bayesian optimization
 domain_start_p=-4
