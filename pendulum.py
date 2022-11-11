@@ -10,7 +10,7 @@ from src.tools.logger import load
 from src.tools.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt
 from rich.progress import track
-from src.losses.losses import PendulumError, PendulumErrorWithConstraint 
+from src.losses.losses import PendulumError, PendulumErrorWithConstraint, PendulumErrorWitOuthConstraint
 from src.pendulum.config import Config as PendulumConfig
 from src.models.GPModel import ExactGPModel, BatchIndependentMultitaskGPModel
 
@@ -60,7 +60,7 @@ def plot_end(
 
 
 @app.command()
-def train(
+def train_unconstrained(
     config_path: str = typer.Option("config.txt", help="Path to config file"),
     config_path_pendulum: str = typer.Option("config_pendulum.txt", help="Path to config file"),
 ):
@@ -76,9 +76,10 @@ def train(
 
     #Pendulum dependent dynamics and losses
     X_star = simulate(config_pendulum, dynamics_ideal, U_star)
-    loss = PendulumError(X_star, config_pendulum)
+    loss = PendulumErrorWitOuthConstraint(X_star, config_pendulum)
+    # loss = PendulumError(X_star, config_pendulum)
 
-    model = ExactGPModel(config)
+    model = BatchIndependentMultitaskGPModel(config, loss.dim)
 
     trainer = Trainer(config, X_star)
     trainer.train(loss, model)

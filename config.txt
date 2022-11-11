@@ -4,7 +4,7 @@ save_file = data.txt
 
 [Optimization]
 ; Number of Bayesian Optimization steps
-n_opt_samples = 1
+n_opt_samples = 50 
 
 ; Dimension of paramerers
 dim = 2
