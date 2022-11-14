@@ -109,7 +109,7 @@ class PlotPendulum:
             yNormalizer.itransform(mean)[:,0].reshape(self.config.plotting_n_samples,self.config.plotting_n_samples),
             vmax=10,
             alpha=0.3,
-            facecolors=cm.jet(var[:,0] .reshape(self.config.plotting_n_samples,self.config.plotting_n_samples)/ np.amax(var)),
+            # facecolors=cm.jet(var[:,0] .reshape(self.config.plotting_n_samples,self.config.plotting_n_samples)/ np.amax(var)),
         )
 
         self.ax.scatter(
@@ -171,8 +171,8 @@ class PlotPendulum:
         with torch.autograd.no_grad():
             out = model(xNormalizer.transform(inp))
 
-        var = out[0].variance.detach().numpy()
-        mean = out[0].mean.detach()
+        var = out[0].variance.detach().repeat(1,len(out)).numpy()
+        mean = out[0].mean.detach().repeat(len(out),1).T
 
         maxIdx = np.argmax(y[: i + 1])
         x_min = x[maxIdx]

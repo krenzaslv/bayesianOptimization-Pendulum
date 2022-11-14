@@ -32,8 +32,7 @@ class PendulumErrorWitOuthConstraint():
         config.kd_bo = k[1]
         X_bo = simulate(config, dynamics_real, U_bo)
         norm = -np.linalg.norm(self.X_star - X_bo)/np.sqrt(self.c.n_simulation)
-        # There seems to be an overflow for high numbers
-        c1 = 1.0 + np.random.normal(0,0.1) # Mock constraint
+        c1 = 1.0 + np.random.normal(0,0.1)# Mock constraint
 
         return [torch.tensor([k[0], k[1]]), torch.tensor([norm, c1]), X_bo]
 

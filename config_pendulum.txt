@@ -19,8 +19,8 @@ max_torque = 1000000
 
 [Controller]
 ; Disturbance parameters
-kp =2
-kd =0
+kp =3
+kd =2
 
 ; Initial optimization parameters
 kd_bo = 0

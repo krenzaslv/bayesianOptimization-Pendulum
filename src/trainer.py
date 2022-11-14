@@ -42,7 +42,7 @@ class Trainer:
 
             aquisition = aquisition(model, xNormalizer, yNormalizer, i, self.config, self.logger.writer, loss.dim)
             [k, loss_ucb] = aquisition.optimize()
-            k = xNormalizer.itransform(k).detach().numpy()
+            k = xNormalizer.itransform(k)[0].detach().numpy()
 
             self.logger.log(
                 model, i, X_bo, x_k.detach(), y_k.detach(), xNormalizer, yNormalizer, loss_ucb.detach()
