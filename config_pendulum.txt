@@ -15,12 +15,12 @@ x0 = -2.14
 x0_dot = 0
 
 ; Maximum torque that can be applied by controller
-max_torque = 1000
+max_torque = 1000000
 
 [Controller]
 ; Disturbance parameters
-kp =3
-kd =2
+kp =2
+kd =0
 
 ; Initial optimization parameters
 kd_bo = 0

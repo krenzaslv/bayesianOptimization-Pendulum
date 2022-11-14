@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from rich.progress import track
 from src.losses.losses import PendulumError, PendulumErrorWithConstraint, PendulumErrorWitOuthConstraint
 from src.pendulum.config import Config as PendulumConfig
-from src.models.GPModel import ExactGPModel, BatchIndependentMultitaskGPModel
+from src.models.GPModel import ExactGPModel, ExactMultiTaskGP 
 
 # torch.set_default_dtype(torch.float64)
 app = typer.Typer()
@@ -77,9 +77,8 @@ def train_unconstrained(
     #Pendulum dependent dynamics and losses
     X_star = simulate(config_pendulum, dynamics_ideal, U_star)
     loss = PendulumErrorWitOuthConstraint(X_star, config_pendulum)
-    # loss = PendulumError(X_star, config_pendulum)
 
-    model = BatchIndependentMultitaskGPModel(config, loss.dim)
+    model = ExactMultiTaskGP(config, loss.dim)
 
     trainer = Trainer(config, X_star)
     trainer.train(loss, model)
@@ -105,7 +104,7 @@ def train_constrained(
     loss = PendulumErrorWithConstraint(X_star, config_pendulum)
     # loss = PendulumError(X_star, config_pendulum)
 
-    model = BatchIndependentMultitaskGPModel(config, loss.dim)
+    model = ExactMultiTaskGP(config, loss.dim)
 
     trainer = Trainer(config, X_star)
     trainer.train(loss, model)

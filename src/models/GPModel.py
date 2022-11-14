@@ -1,41 +1,42 @@
 import torch
 import gpytorch
 from torch.nn import Sequential, ReLU, Linear
+from gpytorch.models import IndependentModelList
 
 
-class BatchIndependentMultitaskGPModel(gpytorch.models.ExactGP):
+class ExactMultiTaskGP:
     def __init__(self, config, dim, train_x=None, train_y=None):
         self.dim = dim
-        likelihood = gpytorch.likelihoods.MultitaskGaussianLikelihood(
-                num_tasks=dim,
-                rank=0,
-                has_task_noise=False,
-                has_global_noise=True)
-        likelihood.noise = torch.tensor([config.init_variance])
         train_x = torch.zeros(1, 2) if train_x == None else train_x
-        train_y = torch.zeros(dim) if train_y == None else self.reshapeYToBatchSize(train_y)
+        train_y = torch.zeros(1, dim) if train_y == None else train_y
+        self.train_x = train_x
+        self.config = config
 
-        super().__init__(train_x, train_y, likelihood)
+        self.setUpModels(dim, train_x, train_y)
 
-        self.mean_module = gpytorch.means.ZeroMean(batch_shape=torch.Size([dim]))
-        self.covar_module = gpytorch.kernels.ScaleKernel(
-            gpytorch.kernels.MaternKernel(batch_shape=torch.Size([dim])),
-            batch_shape=torch.Size([dim])
-        )
 
-    def reshapeYToBatchSize(self, y_train):
-        return y_train.transpose(1,1).flatten()
+    def setUpModels(self, dim, train_x, train_y):
+        self.models = []
+        for i in range(dim):
+            model = ExactGPModel(self.config, train_x, train_y[:, i])
+            self.models.append(model)
 
+        self.model = IndependentModelList(*self.models)
 
     def forward(self, x):
-        mean_x = self.mean_module(x)
-        covar_x = self.covar_module(x)
-        return gpytorch.distributions.MultitaskMultivariateNormal.from_batch_mvn(
-            gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
-        )
+        inp = [x for i in range(self.dim)]
+        return self.model(*inp)
+
+    def __call__(self, x):
+        return self.forward(x)
+
+    def eval(self):
+        for i in range(self.dim):
+            self.models[i].eval()
 
     def updateModel(self, train_x, train_y):
-        super().set_train_data(train_x, self.reshapeYToBatchSize(train_y), strict=False)
+        for i in range(self.dim):
+            self.models[i].set_train_data(train_x, train_y[:, i], strict=False)
 
 
 class ExactGPModel(gpytorch.models.ExactGP):
@@ -43,7 +44,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         likelihood = gpytorch.likelihoods.GaussianLikelihood(
             noise_constraint=gpytorch.constraints.GreaterThan(1e-4)
         )
-        likelihood.noise = torch.tensor([config.init_variance])
+        likelihood.noise = config.init_variance
 
         super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
 
@@ -58,7 +59,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
     def updateModel(self, train_x, train_y):
-        super().set_train_data(train_x, train_y[:, 0], strict=False)
+        super().set_train_data(train_x, train_y, strict=False)
 
 
 class MLPMean(gpytorch.means.Mean):

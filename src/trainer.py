@@ -24,9 +24,9 @@ class Trainer:
         for i in track(range(self.config.n_opt_samples), description="Training..."):
             # 1. collect Data
             [x_k, y_k, X_bo] = loss.evaluate(k)
-            [train_x[i, :], train_y[i]] = [x_k, y_k]
-            xNormalizer = Normalizer()
-            yNormalizer = Normalizer()
+            [train_x[i, :], train_y[i, :]] = [x_k, y_k]
+            xNormalizer = Normalizer(self.config.normalize_data)
+            yNormalizer = Normalizer(self.config.normalize_data)
             train_x_n = xNormalizer.fit_transform(train_x[: i + 1])
             train_y_n = yNormalizer.fit_transform(train_y[: i + 1])
 
@@ -42,7 +42,7 @@ class Trainer:
 
             aquisition = aquisition(model, xNormalizer, yNormalizer, i, self.config, self.logger.writer, loss.dim)
             [k, loss_ucb] = aquisition.optimize()
-            k = xNormalizer.itransform(k)[0].detach().numpy()
+            k = xNormalizer.itransform(k).detach().numpy()
 
             self.logger.log(
                 model, i, X_bo, x_k.detach(), y_k.detach(), xNormalizer, yNormalizer, loss_ucb.detach()

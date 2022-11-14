@@ -2,6 +2,7 @@ import torch
 from torch.autograd import Variable
 from src.tools.random import rand2d_torch
 
+
 class BaseAquisition:
 
     def __init__(self, model, xNormalizer, yNormalizer, t, c, logger, dim):
@@ -46,15 +47,15 @@ class BaseAquisition:
 
         t = self.getInitPoints()
 
-        loss = -self.loss(self.model(t)) 
-        loss_perf = loss if loss.dim() == 1 else loss[:,0]
-        minIdx = torch.argmin(loss_perf)       
+        loss = -self.loss(self.model(t))
+        loss_perf = loss if loss.dim() == 1 else loss[:, 0]
+        minIdx = torch.argmin(loss_perf)
 
-        if(self.c.skip_aready_samples):
+        if (self.c.skip_aready_samples):
             k = 1
             while t[minIdx] in self.model.train_inputs[0]:
                 k += 1
-                _ ,minIdx = torch.kthvalue(loss_perf, k)
+                _, minIdx = torch.kthvalue(loss_perf, k)
 
         return [t[minIdx], loss[minIdx]]
 

@@ -1,24 +1,21 @@
 import torch
+from sklearn.preprocessing import StandardScaler
 
 class Normalizer:
     def __init__(self, normalize=True):
-        self.normalize = normalize
+        self.scaler = StandardScaler(with_mean=normalize, with_std=normalize)
 
     def fit_transform(self, data):
-        if self.normalize:
-            if data.shape[0] > 1:
-                self.mean = data.mean(dim=0, keepdim=True)
-                self.std = data.std(dim=0, keepdim=True)
-            else:
-                self.mean = data.mean(dim=0, keepdim=True)
-                self.std = 1
-        else:
-            self.mean = torch.zeros(1) if data.dim() == 1 else torch.zeros(1, data.shape[1])
-            self.std = torch.ones_like(self.mean)
-        return self.transform(data)
+        x = self.scaler.fit_transform(data.detach().numpy())
+        return torch.from_numpy(x)
 
     def transform(self, data):
-        return (data - self.mean) / self.std
+        x = self.scaler.transform(data.detach().numpy())
+        return torch.from_numpy(x)
 
     def itransform(self, data):
-        return data * self.std + self.mean
+        if data.dim() == 1:
+            x = data.reshape(1, -1)
+        x = self.scaler.inverse_transform(x.detach().numpy())
+
+        return torch.from_numpy(x[0]) if data.dim() == 1 else torch.from_numpy(x)

@@ -169,10 +169,10 @@ class PlotPendulum:
 
         inp = self.createGrid().reshape(-1,2)
         with torch.autograd.no_grad():
-            out = model.likelihood(model(xNormalizer.transform(inp)))
+            out = model(xNormalizer.transform(inp))
 
-        var = out.variance.detach().numpy()
-        mean = out.mean.detach()
+        var = out[0].variance.detach().numpy()
+        mean = out[0].mean.detach()
 
         maxIdx = np.argmax(y[: i + 1])
         x_min = x[maxIdx]

@@ -10,16 +10,16 @@ n_opt_samples = 50
 dim = 2
 
 ; Aquisition must be in [UCB, SafeOpt]
-aquisition=UPC
+aquisition=UCB
 
 ; Domain bounds for Bayesian optimization
-domain_start_p=-4
-domain_end_p=4
-domain_start_d=-4
-domain_end_d=4
+domain_start_p=-5
+domain_end_p=5
+domain_start_d=-5
+domain_end_d=5
 
 ;Prior for the lenght scale of the Matern kernel
-init_lenghtscale = 0.2
+init_lenghtscale = 0.5 
 
 ;Variance of likelihood 
 init_variance = 0.0001
@@ -28,13 +28,16 @@ init_variance = 0.0001
 scale_beta = 1 
 
 ; Beta for UCB 
-beta = 3
+beta = 3 
 
 ; Use finite linearly spaced subset instead of continous
 ucb_use_set = True 
 
 ; Skip already sampled points
-skip_aready_samples = True 
+skip_aready_samples = False 
+
+; Normalize Data
+normalize_data = True 
 
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
 ucb_set_n = 100
