@@ -25,7 +25,7 @@ class SafeOpt(BaseAquisition):
         if not torch.any(self.S):
             print("Couldnt find safe set")
 
-        print(self.Q[self.S].shape)
+        # print(self.Q[self.S].shape)
 
         # Set of maximisers
         l, u = self.Q[:, :2].T
@@ -37,8 +37,7 @@ class SafeOpt(BaseAquisition):
         # # Optimistic set of possible expanders
         l = self.Q[:, ::2]
         u = self.Q[:, 1::2]
-
-        s = torch.logical_and(self.S, ~self.M)
+        s = self.S #torch.logical_and(self.S, ~self.M)
         # s[s] = (torch.max((u[s, :] - l[s, :]) , axis=1)[0] >max_var)
         # s[s] = torch.any(u[s, :] - l[s, :] > self.fmin, axis=1)
 
@@ -47,14 +46,18 @@ class SafeOpt(BaseAquisition):
             G_safe = torch.zeros(torch.count_nonzero(s), dtype=bool)
             sort_index = torch.max(u[s, :] - l[s, :], axis=1)[0].argsort()
             for index in reversed(sort_index):
-                for model in self.model.models:
+                for model in self.model.models[1:]:
                     #TODO somehow pickle can't handle fairy_model
                     fModel = ExactGPModel(self.c,
                                           torch.cat((model.train_x, self.parameter_set[s][index].reshape(1, -1))),
                                           torch.cat((model.train_y, u[s, i][index].flatten())))
+                    fModel = ExactGPModel(self.c, model.train_x, model.train_y)
+                    #TODO somehow fmodel doesnt work
                     pred = fModel(self.parameter_set[~self.S])
-                    l2 = pred.mean - torch.sqrt(self.c.beta*pred.variance)
-                    print(torch.any(l2 >= self.fmin))
+                    l2 = pred.mean #- torch.sqrt(self.c.beta*pred.variance)
+                    # print(torch.max(l2))
+                    if torch.any(l2 >= self.fmin):
+                        print(torch.max(l2))
                     G_safe[index] = torch.any(l2 >= self.fmin)
                     if not G_safe[index]:
                         break

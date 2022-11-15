@@ -40,7 +40,7 @@ class ExactMultiTaskGP:
         for i in range(self.dim):
             self.train_x = train_x
             self.train_y = train_y
-            self.models[i].set_train_data(train_x, train_y[:, i], strict=False)
+            self.models[i].updateModel(train_x, train_y[:, i])
 
 
 class ExactGPModel(gpytorch.models.ExactGP):
