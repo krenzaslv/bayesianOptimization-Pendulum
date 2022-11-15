@@ -44,7 +44,7 @@ class Trainer:
             aquisition= SafeOpt if self.config.aquisition == "SafeOpt" else UCBAquisition
 
             aquisition = aquisition(model, xNormalizer, yNormalizer, i, self.config, self.logger.writer, loss.dim)
-            [k, loss_ucb] = aquisition.optimize()
+            [k, loss_ucb] = aquisition.getNextPoint()
             k = xNormalizer.itransform(k)[0].detach().numpy()
 
             [x_k, y_k, X_bo] = loss.evaluate(k)

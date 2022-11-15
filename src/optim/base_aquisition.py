@@ -13,6 +13,8 @@ class BaseAquisition:
         self.c = c
         self.logger = logger
         self.dim = dim
+        self.parameter_set = self.getInitPoints()
+        self.init_points = self.getInitPoints()
 
     def getInitPoints(self):
         if self.c.ucb_use_set:
@@ -42,14 +44,11 @@ class BaseAquisition:
         )
         return t
 
-    def optimize(self):
+    def getNextPoint(self):
         self.model.eval()
 
-        t = self.getInitPoints()
 
-        loss = -self.loss(self.model(t))
-        loss_perf = loss if loss.dim() == 1 else loss[:, 0]
-        minIdx = torch.argmin(loss_perf)
+        [nextX, loss] = self.loss(self.model(self.parameter_set))
 
         if self.model.models[0].train_inputs[0].shape[0] != self.model.models[0].train_inputs[0].unique(dim=0).shape[0]:
             print("Already sampled")
@@ -59,7 +58,7 @@ class BaseAquisition:
                      k += 1
                      _, minIdx = torch.kthvalue(loss_perf, k)
 
-        return [t[minIdx], loss[minIdx]]
+        return [nextX, loss]
 
     def loss(self):
         pass

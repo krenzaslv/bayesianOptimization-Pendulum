@@ -13,14 +13,16 @@ class UCBAquisition(BaseAquisition):
         ucb = torch.zeros(x[0].mean.shape[0], self.dim)
         for i in range(self.dim):
             ucb[:,i] = x[i].mean + self.c.scale_beta*torch.sqrt(self.c.beta*x[i].variance)
-        if self.dim == 1 or not self.c.use_constraints:
-            return ucb
-        else:
+
+        if self.dim != 1 and self.c.use_constraints:
             #UPC-Safe
             for i in range(1, self.dim):
                 l = x[i].mean - self.c.scale_beta*torch.sqrt(self.c.beta*x[i].variance)
-                S = l.le(self.fmin)
-                print(ucb[S].shape)
-                
-                ucb[S,0] = -1e10
-            return ucb
+                S = l.ge(self.fmin)
+
+                ucb = ucb[S]
+                self.init_points = self.init_points[S]
+
+        loss_perf = ucb if ucb.dim() == 1 else ucb[:, 0]
+        maxIdx = torch.argmax(loss_perf)
+        return [self.init_points[maxIdx], ucb[maxIdx]] 
