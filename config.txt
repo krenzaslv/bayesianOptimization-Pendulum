@@ -19,16 +19,16 @@ domain_start_d=-5
 domain_end_d=5
 
 ;Prior for the lenght scale of the Matern kernel
-init_lenghtscale = 0.2 
+init_lenghtscale = 1 
 
 ;Variance of likelihood 
 init_variance = 0.0001
 
 ; Scale factor for beta
-scale_beta = 1
+scale_beta = 0.3 
 
 ; Beta for UCB 
-beta = 3
+beta = 1
 
 ; Use finite linearly spaced subset instead of continous
 ucb_use_set = True 
@@ -39,7 +39,7 @@ skip_aready_samples = False
 use_constraints = False 
 
 ; Normalize Data
-normalize_data = True 
+normalize_data = False 
 
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
 ucb_set_n = 100 
