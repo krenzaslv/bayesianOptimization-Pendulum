@@ -10,6 +10,7 @@ class ExactMultiTaskGP:
         train_x = torch.zeros(1, 2) if train_x == None else train_x
         train_y = torch.zeros(1, dim) if train_y == None else train_y
         self.train_x = train_x
+        self.train_y = train_y
         self.config = config
 
         self.setUpModels(dim, train_x, train_y)
@@ -37,6 +38,8 @@ class ExactMultiTaskGP:
     def updateModel(self, train_x, train_y):
         # self.setUpModels(self.dim, train_x, train_y)
         for i in range(self.dim):
+            self.train_x = train_x
+            self.train_y = train_y
             self.models[i].set_train_data(train_x, train_y[:, i], strict=False)
 
 
@@ -53,6 +56,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
         self.mean_module = gpytorch.means.ZeroMean()
         self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.MaternKernel())
         self.covar_module.base_kernel.lengthscale = config.init_lenghtscale
+        self.train_x = train_x
+        self.train_y = train_y
 
     def forward(self, x):
         mean_x = self.mean_module(x)
@@ -61,6 +66,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
     def updateModel(self, train_x, train_y):
         super().set_train_data(train_x, train_y, strict=False)
+        self.train_x = train_x
+        self.train_y = train_y
 
 
 class MLPMean(gpytorch.means.Mean):
