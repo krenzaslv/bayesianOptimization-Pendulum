@@ -10,7 +10,7 @@ from src.tools.logger import load
 from src.tools.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt
 from rich.progress import track
-from src.losses.losses import PendulumError, PendulumErrorWithConstraint, PendulumErrorWitOuthConstraint
+from src.losses.losses import PendulumError, PendulumErrorWithConstraint
 from src.pendulum.config import Config as PendulumConfig
 from src.models.GPModel import ExactGPModel, ExactMultiTaskGP 
 
@@ -60,31 +60,6 @@ def plot_end(
 
 
 @app.command()
-def train_unconstrained(
-    config_path: str = typer.Option("config.txt", help="Path to config file"),
-    config_path_pendulum: str = typer.Option("config_pendulum.txt", help="Path to config file"),
-):
-    config = Config(config_path)
-    config_pendulum = PendulumConfig(config_path_pendulum)
-
-    # TODO temporary hack to include solution in grid
-    config.kp = config_pendulum.kp
-    config.kd = config_pendulum.kd
-
-    torch.manual_seed(config.seed)
-    np.random.seed(config.seed)
-
-    #Pendulum dependent dynamics and losses
-    X_star = simulate(config_pendulum, dynamics_ideal, U_star)
-    loss = PendulumErrorWitOuthConstraint(X_star, config_pendulum)
-
-    model = ExactMultiTaskGP(config, loss.dim)
-
-    trainer = Trainer(config, X_star)
-    trainer.train(loss, model)
-    trainer.logger.save(config.save_file)
-
-@app.command()
 def train_constrained(
     config_path: str = typer.Option("config.txt", help="Path to config file"),
     config_path_pendulum: str = typer.Option("config_pendulum.txt", help="Path to config file"),
@@ -106,8 +81,9 @@ def train_constrained(
 
     model = ExactMultiTaskGP(config, loss.dim)
 
+    x_safe = torch.tensor([[0,0]])#,[0.5,0.5], [-0.5,-0.5], [-0.5,0.5],[0.5,-0.5]])
     trainer = Trainer(config, X_star)
-    trainer.train(loss, model)
+    trainer.train(loss, model, x_safe)
     trainer.logger.save(config.save_file)
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ save_file = data.txt
 
 [Optimization]
 ; Number of Bayesian Optimization steps
-n_opt_samples = 500 
+n_opt_samples = 50 
 
 ; Dimension of paramerers
 dim = 2
@@ -19,28 +19,30 @@ domain_start_d=-5
 domain_end_d=5
 
 ;Prior for the lenght scale of the Matern kernel
-init_lenghtscale = 0.2
+init_lenghtscale = 0.2 
 
 ;Variance of likelihood 
 init_variance = 0.0001
 
 ; Scale factor for beta
-scale_beta = 1 
+scale_beta = 1
 
 ; Beta for UCB 
-beta = 3 
+beta = 3
 
 ; Use finite linearly spaced subset instead of continous
 ucb_use_set = True 
 
 ; Skip already sampled points
-skip_aready_samples = True
+skip_aready_samples = False 
+
+use_constraints = False 
 
 ; Normalize Data
 normalize_data = True 
 
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
-ucb_set_n = 100
+ucb_set_n = 100 
 
 ; Number of random samples to use for continous aquisition optimization
 n_sample_points = 10000

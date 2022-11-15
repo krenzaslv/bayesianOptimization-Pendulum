@@ -35,6 +35,7 @@ class ExactMultiTaskGP:
             self.models[i].eval()
 
     def updateModel(self, train_x, train_y):
+        # self.setUpModels(self.dim, train_x, train_y)
         for i in range(self.dim):
             self.models[i].set_train_data(train_x, train_y[:, i], strict=False)
 
@@ -42,7 +43,7 @@ class ExactMultiTaskGP:
 class ExactGPModel(gpytorch.models.ExactGP):
     def __init__(self, config, train_x=torch.zeros(1, 2), train_y=torch.zeros(1)):
         likelihood = gpytorch.likelihoods.GaussianLikelihood(
-            noise_constraint=gpytorch.constraints.GreaterThan(1e-4)
+            noise_constraint=gpytorch.constraints.GreaterThan(config.init_variance)
         )
         likelihood.noise = config.init_variance
 

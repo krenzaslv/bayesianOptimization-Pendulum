@@ -51,11 +51,13 @@ class BaseAquisition:
         loss_perf = loss if loss.dim() == 1 else loss[:, 0]
         minIdx = torch.argmin(loss_perf)
 
-        if (self.c.skip_aready_samples):
-            k = 1
-            while t[minIdx] in self.model.models[0].train_inputs[0]:
-                k += 1
-                _, minIdx = torch.kthvalue(loss_perf, k)
+        if self.model.models[0].train_inputs[0].shape[0] != self.model.models[0].train_inputs[0].unique(dim=0).shape[0]:
+            print("Already sampled")
+            if (self.c.skip_aready_samples):
+                 k = 1
+                 while t[minIdx] in self.model.models[0].train_inputs[0]:
+                     k += 1
+                     _, minIdx = torch.kthvalue(loss_perf, k)
 
         return [t[minIdx], loss[minIdx]]
 

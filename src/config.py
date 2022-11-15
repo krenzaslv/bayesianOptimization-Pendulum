@@ -14,6 +14,7 @@ class Config:
         self.init_variance = self.config.getfloat("Optimization", "init_variance")
         self.skip_aready_samples = self.config.getboolean("Optimization","skip_aready_samples")
         self.normalize_data=self.config.getboolean("Optimization","normalize_data")
+        self.use_constraints = self.config.getboolean("Optimization","use_constraints")
         self.beta = self.config.getfloat("Optimization", "beta")
         self.dim = self.config.getint("Optimization", "dim")
         self.n_sample_points = self.config.getint("Optimization", "n_sample_points")
