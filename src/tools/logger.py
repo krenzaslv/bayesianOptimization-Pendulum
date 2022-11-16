@@ -2,7 +2,8 @@ import numpy as np
 import torch
 import pickle
 from src.tools.summary_writer import SummaryWriter
-
+from src.models.GPModel import ExactGPModel, ExactMultiTaskGP
+import copy
 
 class Logger:
     def __init__(self, config):
@@ -13,17 +14,19 @@ class Logger:
         self.xNormalizer_buffer = []
         self.yNormalizer_buffer = []
         self.y_min_buffer = []
+        self.loss_aq_buffer = []
         self.writer = SummaryWriter()
         self.c = config
 
     def log(self, model, i, X_k, x_k, y_k, xNormalizer, yNormalizer, loss_aq):
         model.eval()
         self.X_buffer.append(X_k)
-        self.model_buffer.append(model)
+        self.model_buffer.append(copy.deepcopy(model))
         self.x_k_buffer.append(x_k)
         self.y_k_buffer.append(y_k if y_k.dim == 1 else y_k[0])
         self.xNormalizer_buffer.append(xNormalizer)
         self.yNormalizer_buffer.append(yNormalizer)
+        self.loss_aq_buffer.append(loss_aq)
         ykBuffer = np.array(self.y_k_buffer)
         minIdx = np.argmin(ykBuffer)
         self.y_min_buffer.append(self.y_k_buffer[minIdx])
@@ -56,6 +59,9 @@ class Logger:
             )
 
     def getDataFromEpoch(self, i):
+        # model = ExactMultiTaskGP(self.c, len(self.loss_aq_buffer[0]))
+        # model.load_state_dict(self.c, self.model_buffer[i])
+        # model.eval()
         return [
             self.model_buffer[i],
             self.X_buffer[: i + 1],

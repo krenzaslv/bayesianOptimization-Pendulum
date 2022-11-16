@@ -32,14 +32,15 @@ class SafeOpt(BaseAquisition):
 
         self.M[:] = False
         self.M[self.S] = u[self.S] >= torch.max(l[self.S], dim=0)[0]
+        print(torch.any(self.M))
         max_var = torch.max(u[self.M] - l[self.M], dim=0)[0]
 
         # # Optimistic set of possible expanders
         l = self.Q[:, ::2]
         u = self.Q[:, 1::2]
-        s = torch.logical_and(self.S, ~self.M)
-        # s[s] = (torch.max((u[s, :] - l[s, :]) , axis=1)[0] >max_var)
-        # s[s] = torch.any(u[s, :] - l[s, :] > self.fmin, axis=1)
+        s = self.S #torch.logical_and(self.S, ~self.M)
+        s[s.clone()] = (torch.max((u[s, :] - l[s, :]) , axis=1)[0] >max_var)
+        s[s.clone()] = torch.any(u[s, :] - l[s, :] > self.fmin, axis=1)
 
         y = torch.ones_like(self.parameter_set)
         if (torch.any(s)):

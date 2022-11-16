@@ -24,6 +24,17 @@ class ExactMultiTaskGP:
 
         self.model = IndependentModelList(*self.models)
 
+    def state_dict(self):
+        return [model.state_dict() for model in self.models]
+
+    def load_state_dict(self, config, state_dict_list):
+        self.models = []
+        for state_dict in state_dict_list:
+            model = ExactGPModel(config)
+            model.load_state_dict(state_dict)
+            self.models.append(model)
+        self.model = IndependentModelList(*self.models)
+
     def forward(self, x):
         inp = [x for i in range(self.dim)]
         return self.model(*inp)

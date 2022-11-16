@@ -4,6 +4,7 @@ import numpy as np
 import seaborn as sns
 from matplotlib import cm
 from rich.progress import track
+from matplotlib.colors import TwoSlopeNorm 
 
 
 class PlotPendulum:
@@ -67,11 +68,18 @@ class PlotPendulum:
     def plotSurface(
         self, i, inp, mean, var, x, y, x_min, y_min, xNormalizer, yNormalizer, model
     ):
-        _inp = inp.reshape(self.config.plotting_n_samples,self.config.plotting_n_samples, 2)
+        _inp = inp.reshape(self.config.plotting_n_samples, self.config.plotting_n_samples, 2)
+
+        # mask = (torch.min(mean[:,1:]-self.config.scale_beta*np.sqrt(self.config.beta*var[:,1:]), dim=1)[0] < 0).reshape(self.config.plotting_n_samples,self.config.plotting_n_samples)
+        # colors = yNormalizer.itransform(mean)[:, 0].reshape(self.config.plotting_n_samples, self.config.plotting_n_samples)
+        # colors[mask] = 1
+        colors = (torch.min(mean[:,1:]-self.config.scale_beta*np.sqrt(self.config.beta*var[:,1:]), dim=1)[0]).reshape(self.config.plotting_n_samples,self.config.plotting_n_samples)
+        # colors = yNormalizer.itransform(mean)[:, 0].reshape(self.config.plotting_n_samples, self.config.plotting_n_samples)
         self.ax5.contourf(
             _inp[:, :, 0],
             _inp[:, :, 1],
-            yNormalizer.itransform(mean)[:,0].reshape(self.config.plotting_n_samples,self.config.plotting_n_samples),
+            colors,
+            norm=TwoSlopeNorm(0),
             cmap=cm.RdBu,
             levels=50
         )
@@ -102,13 +110,17 @@ class PlotPendulum:
             marker="X",
             markersize=20,
         )
+        mask = (torch.min(mean[:,1:]-self.config.scale_beta*np.sqrt(self.config.beta*var[:,1:]), dim=1)[0] < 0).reshape(self.config.plotting_n_samples,self.config.plotting_n_samples)
+        colors = var[:, 0].reshape(self.config.plotting_n_samples,self.config.plotting_n_samples)/np.amax(var[:, 0])
+        # colors[mask] = 1
         self.ax.plot_surface(
             _inp[:, :, 0],
             _inp[:, :, 1],
-            yNormalizer.itransform(mean)[:,0].reshape(self.config.plotting_n_samples,self.config.plotting_n_samples),
+            yNormalizer.itransform(mean)[:, 0].reshape(
+                self.config.plotting_n_samples, self.config.plotting_n_samples),
             vmax=10,
             alpha=0.3,
-            facecolors=cm.jet(var.reshape(self.config.plotting_n_samples,self.config.plotting_n_samples)/ np.amax(var)),
+            facecolors=cm.jet(colors),
         )
 
         self.ax.scatter(
@@ -166,12 +178,14 @@ class PlotPendulum:
             y_min_buffer,
         ] = logger.getDataFromEpoch(i)
 
-        inp = self.createGrid().reshape(-1,2)
+        inp = self.createGrid().reshape(-1, 2)
         with torch.autograd.no_grad():
             out = model(xNormalizer.transform(inp))
 
-        var = out[0].variance.detach().numpy()
-        mean = out[0].mean.detach().repeat(len(out),1).T
+        var = torch.cat([x.variance.reshape(-1, 1) for x in out],1).detach().numpy()
+        mean = torch.cat([x.mean.reshape(-1, 1) for x in out], 1).detach()
+        # var = out[0].variance.detach().numpy()
+        # mean = out[0].mean.detach().repeat(len(out),1).T
 
         maxIdx = np.argmax(y[: i + 1])
         x_min = x[maxIdx]

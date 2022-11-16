@@ -51,7 +51,7 @@ def plot_end(
     config_pendulum = PendulumConfig(config_path_pendulum)
 
     logger = load(config.save_file)
-    
+   
     X_star = simulate(config_pendulum, dynamics_ideal, U_star)
 
     plotter = PlotPendulum(X_star, config, config_pendulum)
@@ -59,9 +59,8 @@ def plot_end(
     plotter.plotIdx(logger, endIdx)
     plt.show()
 
-
 @app.command()
-def train_constrained(
+def train(
     config_path: str = typer.Option("config.txt", help="Path to config file"),
     config_path_pendulum: str = typer.Option("config_pendulum.txt", help="Path to config file"),
 ):

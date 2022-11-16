@@ -10,7 +10,7 @@ n_opt_samples = 50
 dim = 2
 
 ; Aquisition must be in [UCB, SafeOpt]
-aquisition=SafeOpt
+aquisition=SafeOpts
 
 ; Domain bounds for Bayesian optimization
 domain_start_p=-5
