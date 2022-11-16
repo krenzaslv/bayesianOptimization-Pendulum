@@ -1,4 +1,5 @@
 from src.optim.base_aquisition import BaseAquisition
+from src.models.GPModel import ExactGPModel, ExactMultiTaskGP
 import torch
 
 

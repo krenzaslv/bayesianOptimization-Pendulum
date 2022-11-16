@@ -40,7 +40,7 @@ class BaseAquisition:
 
         t = Variable(
             self.xNormalizer.transform(init),
-            requires_grad=True,
+            requires_grad=False,
         )
         return t
 

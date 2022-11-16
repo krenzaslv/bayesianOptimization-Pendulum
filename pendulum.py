@@ -13,6 +13,7 @@ from rich.progress import track
 from src.losses.losses import PendulumError, PendulumErrorWithConstraint
 from src.pendulum.config import Config as PendulumConfig
 from src.models.GPModel import ExactGPModel, ExactMultiTaskGP 
+from src.models.GPModel import ExactGPModel, ExactMultiTaskGP
 
 # torch.set_default_dtype(torch.float64)
 app = typer.Typer()
