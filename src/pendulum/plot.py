@@ -4,7 +4,7 @@ import numpy as np
 import seaborn as sns
 from matplotlib import cm
 from rich.progress import track
-from matplotlib.colors import TwoSlopeNorm 
+from matplotlib.colors import TwoSlopeNorm
 
 
 class PlotPendulum:
@@ -73,7 +73,8 @@ class PlotPendulum:
         # mask = (torch.min(mean[:,1:]-self.config.scale_beta*np.sqrt(self.config.beta*var[:,1:]), dim=1)[0] < 0).reshape(self.config.plotting_n_samples,self.config.plotting_n_samples)
         # colors = yNormalizer.itransform(mean)[:, 0].reshape(self.config.plotting_n_samples, self.config.plotting_n_samples)
         # colors[mask] = 1
-        colors = (torch.min(mean[:,1:]-self.config.scale_beta*np.sqrt(self.config.beta*var[:,1:]), dim=1)[0]).reshape(self.config.plotting_n_samples,self.config.plotting_n_samples)
+        colors = (torch.min(mean[:, 1:]-self.config.scale_beta*np.sqrt(self.config.beta*var[:, 1:]), dim=1)[
+                  0]).reshape(self.config.plotting_n_samples, self.config.plotting_n_samples)
         # colors = yNormalizer.itransform(mean)[:, 0].reshape(self.config.plotting_n_samples, self.config.plotting_n_samples)
         self.ax5.contourf(
             _inp[:, :, 0],
@@ -110,8 +111,10 @@ class PlotPendulum:
             marker="X",
             markersize=20,
         )
-        mask = (torch.min(mean[:,1:]-self.config.scale_beta*np.sqrt(self.config.beta*var[:,1:]), dim=1)[0] < 0).reshape(self.config.plotting_n_samples,self.config.plotting_n_samples)
-        colors = var[:, 0].reshape(self.config.plotting_n_samples,self.config.plotting_n_samples)/np.amax(var[:, 0])
+        mask = (torch.min(mean[:, 1:]-self.config.scale_beta*np.sqrt(self.config.beta*var[:, 1:]), dim=1)[
+                0] < 0).reshape(self.config.plotting_n_samples, self.config.plotting_n_samples)
+        colors = var[:, 0].reshape(self.config.plotting_n_samples,
+                                   self.config.plotting_n_samples)/np.amax(var[:, 0])
         # colors[mask] = 1
         self.ax.plot_surface(
             _inp[:, :, 0],
@@ -182,7 +185,7 @@ class PlotPendulum:
         with torch.autograd.no_grad():
             out = model(xNormalizer.transform(inp))
 
-        var = torch.cat([x.variance.reshape(-1, 1) for x in out],1).detach().numpy()
+        var = torch.cat([x.variance.reshape(-1, 1) for x in out], 1).detach().numpy()
         mean = torch.cat([x.mean.reshape(-1, 1) for x in out], 1).detach()
         # var = out[0].variance.detach().numpy()
         # mean = out[0].mean.detach().repeat(len(out),1).T

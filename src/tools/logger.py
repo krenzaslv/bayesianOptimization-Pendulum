@@ -18,7 +18,7 @@ class Logger:
         self.writer = SummaryWriter()
         self.c = config
 
-    def log(self, model, i, X_k, x_k, y_k, xNormalizer, yNormalizer, loss_aq):
+    def log(self, model, i, offset, X_k, x_k, y_k, xNormalizer, yNormalizer, loss_aq):
         model.eval()
         self.X_buffer.append(X_k)
         self.model_buffer.append(copy.deepcopy(model))
@@ -35,7 +35,7 @@ class Logger:
 
         self.writer.add_scalar("Loss/Aquisition", loss_aq, i)
         self.writer.add_scalar("Loss/yMin", self.y_min_buffer[i], i)
-        if i == self.c.n_opt_samples - 1:
+        if i == self.c.n_opt_samples - 1 - offset:
             self.writer.add_hparams(
                 {
                     "init_lenghtscale": self.c.init_lenghtscale,
@@ -43,25 +43,15 @@ class Logger:
                     "init_variance": self.c.init_variance,
                     "n_opt_samples": self.c.n_opt_samples,
                     "beta": self.c.beta,
-                    "ucb_use_set": self.c.ucb_use_set,
-                    "ucb_set_n": self.c.ucb_set_n,
+                    "set_size": self.c.set_size,
                 },
                 {
-                    # "hparam/GP": loss_gp,
-                    # "hparam/AQ": loss_aq,
-                    # "hparam/yMin": self.y_min_buffer[i],
-                    "Loss/GP": None,
                     "Loss/yMin": None,
                     "Loss/Aquisition": None,
-                    # "GP/lengthscale_p": None,
-                    # "GP/lengthscale_d": None,
                 },
             )
 
     def getDataFromEpoch(self, i):
-        # model = ExactMultiTaskGP(self.c, len(self.loss_aq_buffer[0]))
-        # model.load_state_dict(self.c, self.model_buffer[i])
-        # model.eval()
         return [
             self.model_buffer[i],
             self.X_buffer[: i + 1],

@@ -1,5 +1,5 @@
-from src.models.GPModel import ExactGPModel, ExactMultiTaskGP
 from src.optim.base_aquisition import BaseAquisition
+from src.models.GPModel import ExactGPModel
 import torch
 
 
@@ -25,21 +25,18 @@ class SafeOpt(BaseAquisition):
         if not torch.any(self.S):
             print("Couldnt find safe set")
 
-        # print(self.Q[self.S].shape)
-
         # Set of maximisers
         l, u = self.Q[:, :2].T
 
         self.M[:] = False
         self.M[self.S] = u[self.S] >= torch.max(l[self.S], dim=0)[0]
-        print(torch.any(self.M))
         max_var = torch.max(u[self.M] - l[self.M], dim=0)[0]
 
         # # Optimistic set of possible expanders
         l = self.Q[:, ::2]
         u = self.Q[:, 1::2]
-        s = self.S #torch.logical_and(self.S, ~self.M)
-        s[s.clone()] = (torch.max((u[s, :] - l[s, :]) , axis=1)[0] >max_var)
+        s = self.S  # torch.logical_and(self.S, ~self.M)
+        s[s.clone()] = (torch.max((u[s, :] - l[s, :]), axis=1)[0] > max_var)
         s[s.clone()] = torch.any(u[s, :] - l[s, :] > self.fmin, axis=1)
 
         y = torch.ones_like(self.parameter_set)
@@ -50,8 +47,9 @@ class SafeOpt(BaseAquisition):
             for index in reversed(sort_index):
                 for model in self.model.models[1:]:
                     fModel = ExactGPModel(self.c,
-                                          torch.cat((model.train_x, self.parameter_set[s][index].reshape(1, -1))),
-                                          torch.cat((model.train_y, u[s,i][index].flatten())))
+                                          torch.cat(
+                                              (model.train_x, self.parameter_set[s][index].reshape(1, -1))),
+                                          torch.cat((model.train_y, u[s, i][index].flatten())))
                     fModel.eval()
 
                     pred = fModel(model.train_x)

@@ -1,7 +1,7 @@
 import torch
 from torch.autograd import Variable
 from src.tools.random import rand2d_torch
-
+from rich import print
 
 class BaseAquisition:
 
@@ -15,28 +15,18 @@ class BaseAquisition:
         self.dim = dim
         self.parameter_set = self.getInitPoints()
         self.init_points = self.getInitPoints()
+        self.n_double = 0
 
     def getInitPoints(self):
-        if self.c.ucb_use_set:
-            xs = torch.linspace(
-                self.c.domain_start_p, self.c.domain_end_p, self.c.ucb_set_n
-            )
-            ys = torch.linspace(
-                self.c.domain_start_d, self.c.domain_end_d, self.c.ucb_set_n
-            )
-            x, y = torch.meshgrid(xs, ys, indexing="xy")
-            init = torch.stack((x, y), dim=2)
-            init = torch.reshape(init, (-1, 2))
-            init = torch.cat((init, torch.tensor([[self.c.kp, self.c.kd]])), 0)
-
-        else:
-            init = rand2d_torch(
-                self.c.domain_start_p,
-                self.c.domain_end_p,
-                self.c.domain_start_d,
-                self.c.domain_end_d,
-                self.c.n_sample_points,
-            )
+        xs = torch.linspace(
+            self.c.domain_start_p, self.c.domain_end_p, self.c.set_size
+        )
+        ys = torch.linspace(
+            self.c.domain_start_d, self.c.domain_end_d, self.c.set_size
+        )
+        x, y = torch.meshgrid(xs, ys, indexing="xy")
+        init = torch.stack((x, y), dim=2)
+        init = torch.reshape(init, (-1, 2))
 
         t = Variable(
             self.xNormalizer.transform(init),
@@ -47,11 +37,10 @@ class BaseAquisition:
     def getNextPoint(self):
         self.model.eval()
 
-
         [nextX, loss] = self.loss(self.model(self.parameter_set))
 
-        if self.model.models[0].train_inputs[0].shape[0] != self.model.models[0].train_inputs[0].unique(dim=0).shape[0]:
-            print("Already sampled")
+        if self.model.models[0].train_inputs[0].shape[0] - self.n_double != self.model.models[0].train_inputs[0].unique(dim=0).shape[0]:
+            print("[bold red][Alert] Already sampled {}".format(nextX))
 
         return [nextX, loss]
 

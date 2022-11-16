@@ -3,14 +3,14 @@ seed = 42
 save_file = data.txt
 
 [Optimization]
-; Number of Bayesian Optimization steps
-n_opt_samples = 50 
+ ; Number of Bayesian Optimization steps
+n_opt_samples = 50
 
-; Dimension of paramerers
+; Dimension of parameters
 dim = 2
 
-; Aquisition must be in [UCB, SafeOpt]
-aquisition=SafeOpts
+;Aquisition must be one of [UCB, SafeUCB, SafeOpt]
+aquisition=SafeUCB 
 
 ; Domain bounds for Bayesian optimization
 domain_start_p=-5
@@ -21,31 +21,18 @@ domain_end_d=5
 ;Prior for the lenght scale of the Matern kernel
 init_lenghtscale = 1 
 
-;Variance of likelihood 
-init_variance = 0.0001
+;Variance of likelihood
+init_variance = 0.0001  
 
-; Scale factor for beta
-scale_beta = 0.3 
+; Scale factor for beta 
+scale_beta = 0.3
+; beta for confidence bound
+beta = 1 
 
-; Beta for UCB 
-beta = 1
-
-; Use finite linearly spaced subset instead of continous
-ucb_use_set = True 
-
-; Skip already sampled points
-skip_aready_samples = False 
-
-use_constraints = True 
-
-; Normalize Data
-normalize_data = False 
-
+ ; Normalize Data
+normalize_data = False
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
-ucb_set_n = 100 
-
-; Number of random samples to use for continous aquisition optimization
-n_sample_points = 10000
+set_size = 100 
 
 [Plotting]
 ; Number of linearly spaced samples for plotting

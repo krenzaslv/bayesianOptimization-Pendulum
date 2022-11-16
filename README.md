@@ -1,6 +1,6 @@
 ![Employee data](/doc/animation.gif?raw=true "Employee Data title")
 # Bayesian Optimization for disturbed dynamics
-Actively learning the disturbance of a dynamical system. The disturbance is modeled with a PD controller
+Actively learning the disturbance parameters of a dynamical system.
 
 ## Setup
 ```
@@ -34,7 +34,6 @@ To create a gif after the plot run
  python pendulum.py make-gif
 ```
 ## Help
-
 ```
  python pendulum.py --help
 ```
