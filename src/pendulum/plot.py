@@ -48,6 +48,7 @@ class PlotPendulum:
         self.ax3.set_ylim(-4, 4)
         self.ax2.set_ylim(-4, 4)
         self.ax3.set_ylim(-4, 4)
+        self.ax5.axis('equal')
 
     def createGrid(self):
         grid_x = torch.linspace(

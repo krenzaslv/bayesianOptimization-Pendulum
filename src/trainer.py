@@ -38,7 +38,6 @@ class Trainer:
             model.updateModel(train_x_n, train_y_n)
 
             # 2. Find next k
-
             if self.config.aquisition == "SafeOpt":
                 aquisition = SafeOpt 
             elif self.config.aquisition == "SafeUCB":

@@ -11,7 +11,7 @@ n_simulation = 5000
 dt = 0.001
 
 ; Initial state
-x0 = -2.14
+x0 = -1.14
 x0_dot = 0
 
 ; Maximum torque that can be applied by controller
@@ -19,16 +19,16 @@ max_torque = 1000000
 
 [Controller]
 ; Disturbance parameters
-kp =3
-kd =2
+kp = 3
+kd = 1
 
 ; Initial optimization parameters
 kd_bo = 0
 kp_bo = 0
 
 ; Optimal parameters from Simulation
-k1 = 4
-k2 = 3.5
+k1 = 6
+k2 = 0 
 
 ; Random variance y = f + e
 eps = 0

@@ -17,10 +17,10 @@ class SafeUCB(BaseAquisition):
         # UPC-Safe
         for i in range(1, self.dim):
             l = x[i].mean - self.c.scale_beta*torch.sqrt(self.c.beta*x[i].variance)
-            S = l.ge(self.fmin)
+            S = l.le(self.fmin)
 
-            ucb = ucb[S]
-            self.init_points = self.init_points[S]
+            ucb[S] = -1e10
+            # self.init_points = self.init_points[S]
 
         loss_perf = ucb if ucb.dim() == 1 else ucb[:, 0]
         maxIdx = torch.argmax(loss_perf)

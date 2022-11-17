@@ -35,7 +35,7 @@ class SafeOpt(BaseAquisition):
         # # Optimistic set of possible expanders
         l = self.Q[:, ::2]
         u = self.Q[:, 1::2]
-        s = self.S  # torch.logical_and(self.S, ~self.M)
+        s = torch.logical_and(self.S, ~self.M)
         s[s.clone()] = (torch.max((u[s, :] - l[s, :]), axis=1)[0] > max_var)
         s[s.clone()] = torch.any(u[s, :] - l[s, :] > self.fmin, axis=1)
 
