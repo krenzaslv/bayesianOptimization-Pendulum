@@ -2,14 +2,14 @@ import typer
 import numpy as np
 from src.trainer import Trainer
 from src.pendulum.simulator import simulate
-from src.pendulum.dynamics import dynamics_ideal, U_star
+from src.pendulum.dynamics import U_bo, dynamics_ideal, dynamics_real, U_star
 from src.config import Config
 from src.pendulum.plot import PlotPendulum
 import torch
 from src.tools.logger import load
 from src.tools.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt
-from src.losses.losses import PendulumErrorWithConstraint
+from src.pendulum.losses import PendulumErrorWithConstraint
 from src.pendulum.config import Config as PendulumConfig
 from src.models.GPModel import ExactMultiTaskGP
 from rich import print
@@ -20,11 +20,11 @@ app = typer.Typer()
 def make_gif():
     makeGIF()
 
-
 @app.command()
 def plot(
     config_path: str = typer.Option("config.txt", help="Path to config file"),
     config_path_pendulum: str = typer.Option("config_pendulum.txt", help="Path to config file"),
+    i : int= typer.Option(-1, help="Which epoch to plot"),
 ):
     clearFiles()
     config = Config(config_path)
@@ -34,9 +34,27 @@ def plot(
     X_star = simulate(config_pendulum, dynamics_ideal, U_star)
 
     plotter = PlotPendulum(X_star, config, config_pendulum)
-    plotter.plot(logger)
+    if i == -1:
+        plotter.plot(logger)
+    else:
+        plotter.plotIdx(logger, i)
     plt.show()
 
+@app.command()
+def plot_gym(
+    config_path: str = typer.Option("config.txt", help="Path to config file"),
+    config_path_pendulum: str = typer.Option("config_pendulum.txt", help="Path to config file"),
+    i : int= typer.Option(-1, help="Which epoch to simulate"),
+):
+    clearFiles()
+    config = Config(config_path)
+    config_pendulum = PendulumConfig(config_path_pendulum)
+    config_pendulum.sim_type="Gym"
+    logger = load(config.save_file)
+    logger.kp_bo = logger.x_k_buffer[i][0]
+    logger.kd_bo = logger.x_k_buffer[i][1]
+
+    simulate(config_pendulum, dynamics_real, U_bo)
 
 @app.command()
 def plot_end(
@@ -84,7 +102,6 @@ def train(
     trainer = Trainer(config, X_star)
     trainer.train(loss, model, x_safe)
     trainer.logger.save(config.save_file)
-
 
 if __name__ == "__main__":
     app()

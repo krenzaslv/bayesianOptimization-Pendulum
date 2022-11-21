@@ -14,6 +14,7 @@ class Config:
         self.dt = self.config.getfloat("Dynamics", "dt")
         self.n_simulation = self.config.getint("Dynamics", "n_simulation")
         self.max_torque = self.config.getfloat("Dynamics", "max_torque")
+        self.sim_type = self.config.get("Dynamics", "sim_typ")
         self.x0 = np.array(
             [
                 self.config.getfloat("Dynamics", "x0"),

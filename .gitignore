@@ -12,3 +12,5 @@ src/optim/__pycache__
 src/pendulum/__pycache__
 src/losses/__pycache__
 src/models/__pycache__
+
+.vscode/*

@@ -1,6 +1,5 @@
 import torch
 from torch.autograd import Variable
-from src.tools.random import rand2d_torch
 from rich import print
 
 class BaseAquisition:

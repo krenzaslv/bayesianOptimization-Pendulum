@@ -7,14 +7,12 @@ m = 1
 pi = 0
 
 ; How many simulation steps
-n_simulation = 100
-dt = 0.05
+n_simulation = 5000
+dt = 0.001
 
 ; Initial state
-x0 = 3.14
+x0 = -2.14
 x0_dot = 0
-
-sim_typ=Sim
 
 ; Maximum torque that can be applied by controller
 max_torque = 1000000
