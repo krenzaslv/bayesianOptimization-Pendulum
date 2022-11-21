@@ -45,7 +45,7 @@ class PendulumErrorWithConstraint():
         # # c1 = self.init_norm + 0.5*norm
         # c1 = np.max((self.X_star[:,0] - X_bo[:,0])**2)
         c1 = np.pi*np.pi/4 - np.max((self.X_star[:, 0] - X_bo[:, 0])**2)
-        c2 = np.pi*np.pi - np.max((self.X_star[:, 1] - X_bo[:, 1])**2)
+        c2 = np.pi*np.pi/4 - np.max((self.X_star[:, 1] - X_bo[:, 1])**2)
         # c3 = (np.absolute(k[1]) -3)
 
         return [torch.tensor([k[0], k[1]]), torch.tensor([norm, c1, c2]), X_bo]

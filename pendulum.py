@@ -51,8 +51,8 @@ def plot_gym(
     config_pendulum = PendulumConfig(config_path_pendulum)
     config_pendulum.sim_type="Gym"
     logger = load(config.save_file)
-    logger.kp_bo = logger.x_k_buffer[i][0]
-    logger.kd_bo = logger.x_k_buffer[i][1]
+    config_pendulum.kp_bo = logger.x_k_buffer[i][0]
+    config_pendulum.kd_bo = logger.x_k_buffer[i][1]
 
     simulate(config_pendulum, dynamics_real, U_bo)
 

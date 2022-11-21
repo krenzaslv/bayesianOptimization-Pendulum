@@ -20,7 +20,7 @@ class SafeOpt(BaseAquisition):
             self.Q[:, 2*i+1] = x[i].mean + torch.sqrt(self.c.beta*x[i].variance)
 
         # Compute Safe Set
-        self.S[:] = self.S[:] = torch.all(self.Q[:, 2::2] > self.fmin, axis=1)
+        self.S[:] = torch.all(self.Q[:, 2::2] > self.fmin, axis=1)
 
         if not torch.any(self.S):
             print("Couldnt find safe set")

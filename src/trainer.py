@@ -36,8 +36,6 @@ class Trainer:
             train_x_n = xNormalizer.fit_transform(train_x[: i])
             train_y_n = yNormalizer.fit_transform(train_y[: i])
             model.updateModel(train_x_n, train_y_n)
-            if torch.any(train_y_n[i:] < 0):
-                print("[red] Constraint violated at iteration {}".format(i))
 
             # 2. Find next k
             if self.config.aquisition == "SafeOpt":
@@ -56,6 +54,9 @@ class Trainer:
             # 3. Evaluate new k
             [x_k, y_k, X_bo] = loss.evaluate(k)
             [train_x[i, :], train_y[i, :]] = [x_k, y_k]
+
+            if torch.any(y_k[1:] < 0):
+                print("[red] Constraint violated at iteration {}".format(i))
 
             if y_k[0] > yMin[0]:
                 yMin = y_k
