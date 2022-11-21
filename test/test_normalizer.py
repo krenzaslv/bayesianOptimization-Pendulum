@@ -3,7 +3,7 @@ import numpy as np
 import torch
 
 from src.tools.normalizer import Normalizer
-from src.tools.random import rand2d_torch, rand_torch
+from src.tools.rand import rand2d_torch, rand_torch
 
 torch.set_default_dtype(torch.float64)
 

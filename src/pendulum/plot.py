@@ -44,9 +44,8 @@ class PlotPendulum:
         self.ax3.set_xlabel("t")
         self.ax4.set_ylabel("error")
         self.ax4.set_xlabel("t")
-        self.ax2.set_ylim(-4, 4)
         self.ax3.set_ylim(-4, 4)
-        self.ax2.set_ylim(-4, 4)
+        self.ax2.set_ylim(-4, 10)
         self.ax3.set_ylim(-4, 4)
         self.ax5.axis('equal')
 

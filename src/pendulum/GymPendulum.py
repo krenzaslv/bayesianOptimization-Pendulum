@@ -32,6 +32,10 @@ class GymPendulum(gymnasium.envs.classic_control.PendulumEnv):
         )
         self.observation_space = spaces.Box(low=-high, high=high, dtype=np.float32)
 
+    def _get_obs(self):
+        theta, thetadot = self.state
+        return np.array([np.cos(theta), np.sin(theta), thetadot], dtype=np.float32)
+
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         super().reset(seed=seed)
         self.state = self.config.x0 
