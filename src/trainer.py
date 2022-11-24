@@ -56,11 +56,11 @@ class Trainer:
             [train_x[i, :], train_y[i, :]] = [x_k, y_k]
 
             if torch.any(y_k[1:] < 0):
-                print("[red] Constraint violated at iteration {}".format(i))
+                print("[yellow][Warning][/yellow] Constraint violated at iteration {}".format(i))
 
             if y_k[0] > yMin[0]:
                 yMin = y_k
-                print("Iteration: {}, yMin: {}".format(i, yMin))
+                print("[green][Info][/green] New minimum at Iteration: {}, yMin: {}".format(i, yMin))
 
             self.logger.log(
                 model, i -

@@ -82,7 +82,7 @@ def train(
 ):
     config = Config(config_path)
     config_pendulum = PendulumConfig(config_path_pendulum)
-    print("[green]Using: {}".format(config.aquisition))
+    print("[green][Info][/green] Using: {}".format(config.aquisition))
 
     # TODO temporary hack to include solution in grid
     config.kp = config_pendulum.kp

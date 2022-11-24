@@ -27,7 +27,7 @@ def U_pert(x, c, U):
 
 def dynamics_ideal(x, U, c):
     def f(u): return np.array(
-        [u[1], c.g / c.L * np.sin(u[0]) + U(u, c) / (c.m * c.L * c.L)]
+        [u[1], 3*c.g / (2*c.L) * np.sin(u[0]) + 3*U(u, c) / (c.m * c.L * c.L)]
     ).T
     res = integrate(x, f, c.dt)
     return res

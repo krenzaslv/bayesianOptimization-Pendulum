@@ -39,7 +39,7 @@ class BaseAquisition:
         [nextX, loss] = self.loss(self.model(self.parameter_set))
 
         if self.model.models[0].train_inputs[0].shape[0] - self.n_double != self.model.models[0].train_inputs[0].unique(dim=0).shape[0]:
-            print("[bold red][Alert] Already sampled {}".format(nextX))
+            print("[yellow][Warning][/yellow] Already sampled {}".format(nextX))
 
         return [nextX, loss]
 
