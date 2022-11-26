@@ -13,10 +13,10 @@ dim = 2
 aquisition=SafeUCB
 
 ; Domain bounds for Bayesian optimization
-domain_start_p=-20
-domain_end_p=20
-domain_start_d=-10
-domain_end_d=10
+domain_start_p=-5
+domain_end_p=5
+domain_start_d=-5
+domain_end_d=5
 
 ;Prior for the lenght scale of the Matern kernel
 init_lenghtscale = 1 

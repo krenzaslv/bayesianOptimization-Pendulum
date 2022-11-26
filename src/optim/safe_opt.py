@@ -4,8 +4,8 @@ import torch
 
 
 class SafeOpt(BaseAquisition):
-    def __init__(self, model, xNormalizer, yNormalizer, t, c, logger, dim):
-        super().__init__(model, xNormalizer, yNormalizer, t, c, logger, dim)
+    def __init__(self, model, t, c, logger, dim):
+        super().__init__(model, t, c, logger, dim)
 
         self.Q = torch.empty(self.parameter_set.shape[0], 2*dim)
         self.S = torch.zeros(self.parameter_set.shape[0], dtype=bool)

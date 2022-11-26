@@ -9,8 +9,8 @@ class GymPendulum(gymnasium.envs.classic_control.PendulumEnv):
     def __init__(self, config, render_mode: Optional[str] = "human", g=10.0):
         self.config = config
 
-        self.max_speed = 100 
-        self.max_torque = 100
+        self.max_speed = 1000 
+        self.max_torque = 1000
         self.dt = config.dt
         self.g = config.g
         self.m = config.m 
@@ -38,7 +38,7 @@ class GymPendulum(gymnasium.envs.classic_control.PendulumEnv):
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         super().reset(seed=seed)
-        self.state = self.config.x0 
+        self.state = self.config.x0
         self.last_u = None
 
         if self.render_mode == "human":

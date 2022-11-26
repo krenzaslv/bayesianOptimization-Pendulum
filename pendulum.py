@@ -1,15 +1,15 @@
 import typer
 import numpy as np
 from src.trainer import Trainer
-from src.pendulum.simulator import simulate
-from src.pendulum.dynamics import U_bo, dynamics_ideal, dynamics_real, U_star
+from src.pendulum.simulator import simulate, simulate_gym
+from src.pendulum.dynamics import U_pert, U_bo, dynamics_ideal, dynamics_real, U_star
 from src.config import Config
 from src.pendulum.plot import PlotPendulum
 import torch
 from src.tools.logger import load
 from src.tools.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt
-from src.pendulum.losses import PendulumErrorWithConstraint
+from src.pendulum.losses import PendulumErrorWithConstraint, PendulumErrorWithConstraintRandomInit
 from src.pendulum.config import Config as PendulumConfig
 from src.models.GPModel import ExactMultiTaskGP
 from rich import print
@@ -53,8 +53,8 @@ def plot_gym(
     logger = load(config.save_file)
     config_pendulum.kp_bo = logger.x_k_buffer[i][0]
     config_pendulum.kd_bo = logger.x_k_buffer[i][1]
-
-    simulate(config_pendulum, dynamics_real, U_bo)
+    def U_p(t, c): return U_pert(t, c, U_bo)  # Disturbance
+    simulate_gym(config_pendulum, dynamics_real, U_p, render="human")
 
 @app.command()
 def plot_end(
@@ -94,12 +94,37 @@ def train(
     # Pendulum dependent dynamics and losses
     X_star = simulate(config_pendulum, dynamics_ideal, U_star)
     loss = PendulumErrorWithConstraint(X_star, config_pendulum)
-    # loss = PendulumError(X_star, config_pendulum)
 
     model = ExactMultiTaskGP(config, loss.dim)
 
     x_safe = torch.tensor([[0, 0]])  # ,[0.5,0.5], [-0.5,-0.5], [-0.5,0.5],[0.5,-0.5]])
-    trainer = Trainer(config, X_star)
+    trainer = Trainer(config)
+    trainer.train(loss, model, x_safe)
+    trainer.logger.save(config.save_file)
+
+@app.command()
+def train_gym(
+    config_path: str = typer.Option("config.txt", help="Path to config file"),
+    config_path_pendulum: str = typer.Option("config_pendulum.txt", help="Path to config file"),
+):
+    config = Config(config_path)
+    config_pendulum = PendulumConfig(config_path_pendulum)
+    print("[green][Info][/green] Using: {}".format(config.aquisition))
+
+    # TODO temporary hack to include solution in grid
+    config.kp = config_pendulum.kp
+    config.kd = config_pendulum.kd
+
+    torch.manual_seed(config.seed)
+    np.random.seed(config.seed)
+
+    # Pendulum dependent dynamics and losses
+    loss = PendulumErrorWithConstraintRandomInit(config_pendulum)
+
+    model = ExactMultiTaskGP(config, loss.dim)
+
+    x_safe = torch.tensor([[0, 0]])  # ,[0.5,0.5], [-0.5,-0.5], [-0.5,0.5],[0.5,-0.5]])
+    trainer = Trainer(config)
     trainer.train(loss, model, x_safe)
     trainer.logger.save(config.save_file)
 

@@ -66,7 +66,7 @@ class PlotPendulum:
         return inp
 
     def plotSurface(
-        self, i, inp, mean, var, x, y, x_min, y_min, xNormalizer, yNormalizer, model
+        self, i, inp, mean, var, x, y, x_min, y_min, model
     ):
         _inp = inp.reshape(self.config.plotting_n_samples, self.config.plotting_n_samples, 2)
 
@@ -119,7 +119,7 @@ class PlotPendulum:
         self.ax.plot_surface(
             _inp[:, :, 0],
             _inp[:, :, 1],
-            yNormalizer.itransform(mean)[:, 0].reshape(
+            mean[:, 0].reshape(
                 self.config.plotting_n_samples, self.config.plotting_n_samples),
             vmax=10,
             alpha=0.3,
@@ -176,14 +176,12 @@ class PlotPendulum:
             X,
             x,
             y,
-            xNormalizer,
-            yNormalizer,
             y_min_buffer,
         ] = logger.getDataFromEpoch(i)
 
         inp = self.createGrid().reshape(-1, 2)
         with torch.autograd.no_grad():
-            out = model(xNormalizer.transform(inp))
+            out = model(inp)
 
         var = torch.cat([x.variance.reshape(-1, 1) for x in out], 1).detach().numpy()
         mean = torch.cat([x.mean.reshape(-1, 1) for x in out], 1).detach()
@@ -195,7 +193,7 @@ class PlotPendulum:
         y_min = y[maxIdx]
 
         self.plotSurface(
-            i, inp, mean, var, x, y, x_min, y_min, xNormalizer, yNormalizer, model
+            i, inp, mean, var, x, y, x_min, y_min, model
         )
 
         for X_k in X:

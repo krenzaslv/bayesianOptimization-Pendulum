@@ -3,10 +3,9 @@ import torch
 
 
 class UCB(BaseAquisition):
-    def __init__(self, model, xNormalizer, yNormalizer, t, c, logger, dim):
-        super().__init__(model, xNormalizer, yNormalizer, t, c, logger, dim)
+    def __init__(self, model, t, c, logger, dim):
+        super().__init__(model, t, c, logger, dim)
         self.fmin = 0
-        self.yNormalizer = yNormalizer
         self.dim = dim
 
     def loss(self, x):

@@ -11,25 +11,21 @@ class Logger:
         self.model_buffer = []
         self.y_k_buffer = []
         self.x_k_buffer = []
-        self.xNormalizer_buffer = []
-        self.yNormalizer_buffer = []
         self.y_min_buffer = []
         self.loss_aq_buffer = []
         self.writer = SummaryWriter()
         self.c = config
 
-    def log(self, model, i, offset, X_k, x_k, y_k, xNormalizer, yNormalizer, loss_aq):
+    def log(self, model, i, offset, X_k, x_k, y_k, loss_aq):
         model.eval()
         self.X_buffer.append(X_k)
         self.model_buffer.append(copy.deepcopy(model))
         self.x_k_buffer.append(x_k)
         self.y_k_buffer.append(y_k if y_k.dim == 1 else y_k[0])
-        self.xNormalizer_buffer.append(xNormalizer)
-        self.yNormalizer_buffer.append(yNormalizer)
         self.loss_aq_buffer.append(loss_aq)
         ykBuffer = np.array(self.y_k_buffer)
-        minIdx = np.argmin(ykBuffer)
-        self.y_min_buffer.append(self.y_k_buffer[minIdx])
+        minIdx = np.argmax(ykBuffer)
+        self.y_min_buffer.append(-self.y_k_buffer[minIdx])
 
         loss_aq = loss_aq if loss_aq.dim() == 0 else loss_aq[0]
 
@@ -57,8 +53,6 @@ class Logger:
             self.X_buffer[: i + 1],
             torch.reshape(torch.cat(self.x_k_buffer), (-1, 2)),
             np.array(self.y_k_buffer),
-            self.xNormalizer_buffer[i],
-            self.yNormalizer_buffer[i],
             self.y_min_buffer[: i + 1],
         ]
 
