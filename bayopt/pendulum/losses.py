@@ -1,12 +1,13 @@
-from src.pendulum.dynamics import U_bo, U_pert, dynamics_real, U_star, dynamics_ideal
-from src.pendulum.simulator import simulate
-from src.tools.rand import rand
+from bayopt.pendulum.dynamics import U_bo, U_pert, dynamics_real, U_star, dynamics_ideal
+from bayopt.pendulum.simulator import simulate
+from bayopt.tools.rand import rand
+from bayopt.losses.loss import Loss
 import copy
 import numpy as np
 import torch
 
 
-class PendulumError():
+class PendulumError(Loss):
     def __init__(self, X_star, c):
         self.X_star = X_star
         self.c = c
@@ -21,7 +22,7 @@ class PendulumError():
 
         return [torch.tensor([k[0], k[1]]), torch.tensor([norm]), X_bo]
 
-class PendulumErrorWithConstraintRandomInit():
+class PendulumErrorWithConstraintRandomInit(Loss):
     def __init__(self, c, N =10):
         self.c = c
         self.dim = 3
@@ -40,7 +41,7 @@ class PendulumErrorWithConstraintRandomInit():
             config.kp_bo = k[0]
             config.kd_bo = k[1]
             if i != self.N -1:
-                config.x0[0] = rand(-np.pi, 0, 1)
+                config.x0[0] = rand(-np.pi/2, 0, 1)
                 config.x0[1] = 0 #rand(-0.1, 0.1, 1)
 
             def U_p(t, c): return U_pert(t, c, U_bo)  # Disturbance
@@ -49,13 +50,14 @@ class PendulumErrorWithConstraintRandomInit():
             X_star = simulate(config, dynamics_ideal, U_star)
 
             norm += (0.2 - np.linalg.norm(X_star-X_bo)/np.sqrt(self.c.n_simulation))/self.N
-            c1 += (np.pi*np.pi/4 - np.max((X_star[:, 0] - X_bo[:, 0])**2))/self.N
-            c2 += (np.pi*np.pi/4 - np.max((X_star[:, 1] - X_bo[:, 1])**2))/self.N
+            c1 += (np.pi*np.pi/ 4- np.max((X_star[:, 0] - X_bo[:, 0])**2))/self.N
+            # c2 += (np.pi*np.pi - np.max((X_star[:, 1] - X_bo[:, 1])**2))/self.N
+            c2 += (5 - np.max(np.abs(X_bo[:, 1])))/self.N
 
         return [torch.tensor([k[0], k[1]]), torch.tensor([norm, c1, c2]), X_bo]
 
 
-class PendulumErrorWithConstraint():
+class PendulumErrorWithConstraint(Loss):
     def __init__(self, X_star, c):
         self.X_star = X_star
         self.c = c

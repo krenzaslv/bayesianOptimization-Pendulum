@@ -1,5 +1,5 @@
-from src.optim.base_aquisition import BaseAquisition
-from src.models.GPModel import ExactGPModel
+from bayopt.optim.base_aquisition import BaseAquisition
+from bayopt.models.GPModel import ExactGPModel
 import torch
 
 

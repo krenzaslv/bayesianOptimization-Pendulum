@@ -1,8 +1,8 @@
 import numpy as np
 import torch
 import pickle
-from src.tools.summary_writer import SummaryWriter
-from src.models.GPModel import ExactGPModel, ExactMultiTaskGP
+from bayopt.tools.summary_writer import SummaryWriter
+from bayopt.models.GPModel import ExactGPModel, ExactMultiTaskGP
 import copy
 
 class Logger:

@@ -7,7 +7,8 @@ save_file = data.txt
 n_opt_samples = 50
 
 ; Dimension of parameters
-dim = 2
+dim_obs = 24
+dim_params = 2
 
 ;Aquisition must be one of [UCB, SafeUCB, SafeOpt]
 aquisition=SafeUCB 

@@ -1,6 +1,6 @@
 import numpy as np
-from src.tools.integrator import integrate
-from src.tools.math import clamp, angleDiff
+from bayopt.tools.integrator import integrate
+from bayopt.tools.math import clamp, angleDiff
 
 # c = config
 def U_star(x, c):

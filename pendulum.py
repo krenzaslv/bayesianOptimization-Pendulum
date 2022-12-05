@@ -1,17 +1,17 @@
 import typer
 import numpy as np
-from src.trainer import Trainer
-from src.pendulum.simulator import simulate, simulate_gym
-from src.pendulum.dynamics import U_pert, U_bo, dynamics_ideal, dynamics_real, U_star
-from src.config import Config
-from src.pendulum.plot import PlotPendulum
+from bayopt.trainer import Trainer
+from bayopt.pendulum.simulator import simulate, simulate_gym
+from bayopt.pendulum.dynamics import U_pert, U_bo, dynamics_ideal, dynamics_real, U_star
+from bayopt.config import Config
+from bayopt.pendulum.plot import PlotPendulum
 import torch
-from src.tools.logger import load
-from src.tools.file import clearFiles, makeGIF
+from bayopt.tools.logger import load
+from bayopt.tools.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt
-from src.pendulum.losses import PendulumErrorWithConstraint, PendulumErrorWithConstraintRandomInit
-from src.pendulum.config import Config as PendulumConfig
-from src.models.GPModel import ExactMultiTaskGP
+from bayopt.pendulum.losses import PendulumErrorWithConstraint, PendulumErrorWithConstraintRandomInit
+from bayopt.pendulum.config import Config as PendulumConfig
+from bayopt.models.GPModel import ExactMultiTaskGP
 from rich import print
 
 app = typer.Typer()
@@ -53,6 +53,7 @@ def plot_gym(
     logger = load(config.save_file)
     config_pendulum.kp_bo = logger.x_k_buffer[i][0]
     config_pendulum.kd_bo = logger.x_k_buffer[i][1]
+    print(logger.x_k_buffer[i])
     def U_p(t, c): return U_pert(t, c, U_bo)  # Disturbance
     simulate_gym(config_pendulum, dynamics_real, U_p, render="human")
 

@@ -14,3 +14,6 @@ src/losses/__pycache__
 src/models/__pycache__
 
 .vscode/*
+bo.egg-info/
+bayopt.egg-info
+__pycache__

@@ -11,7 +11,7 @@ n_simulation = 100
 dt = 0.05
 
 ; Initial state
-x0 = 3.4
+x0 = 3.5
 x0_dot = 0
 
 sim_typ=Gym
@@ -21,16 +21,16 @@ max_torque = 1000000
 
 [Controller]
 ; Disturbance parameters
-kp =3
-kd =2
+kp = 3.0
+kd = 1.0 
 
 ; Initial optimization parameters
 kd_bo = 0
 kp_bo = 0
 
 ; Optimal parameters from Simulation
-k1 = 4
-k2 = 3.5
+k1 = 4.0
+k2 = 3.5 
 
 ; Random variance y = f + e
 eps = 0

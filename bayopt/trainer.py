@@ -2,10 +2,10 @@ import numpy as np
 from rich.progress import track
 import torch
 
-from src.tools.logger import Logger
-from src.optim.ucb import UCB 
-from src.optim.safe_opt import SafeOpt
-from src.optim.safe_ucb import SafeUCB 
+from bayopt.tools.logger import Logger
+from bayopt.optim.ucb import UCB 
+from bayopt.optim.safe_opt import SafeOpt
+from bayopt.optim.safe_ucb import SafeUCB 
 from rich import print
 
 
@@ -16,18 +16,14 @@ class Trainer:
         self.logger = Logger(config)
 
     def train(self, loss, model, safePoints):
-        train_x = torch.zeros(self.config.n_opt_samples + safePoints.shape[0], self.config.dim)
+        train_x = torch.zeros(self.config.n_opt_samples + safePoints.shape[0], self.config.dim_params)
         train_y = torch.zeros(self.config.n_opt_samples + safePoints.shape[0], loss.dim)
-        k = np.zeros(self.config.dim)
-
-        # Record data from known safepoint
-        # for i in range(safePoints.shape[0]):
-        #     [x_k, y_k, X_bo] = loss.evaluate(safePoints[i])
-        #     [train_x[i, :], train_y[i, :]] = [x_k, y_k]
+        k = np.zeros(self.config.dim_params)
 
         yMin = -1e10*np.ones(loss.dim)  # Something small
 
         for i in track(range(0,self.config.n_opt_samples-1), description="Training..."):
+            loss.reset()
             
             # 2. Find next k
             if self.config.aquisition == "SafeOpt":

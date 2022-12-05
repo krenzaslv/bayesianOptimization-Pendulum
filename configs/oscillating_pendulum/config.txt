@@ -8,6 +8,7 @@ n_opt_samples = 100
 
 ; Dimension of parameters
 dim = 2
+dim = 24
 
 ;Aquisition must be one of [UCB, SafeUCB, SafeOpt]
 aquisition=SafeOpt
