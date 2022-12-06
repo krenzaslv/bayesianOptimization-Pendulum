@@ -22,5 +22,4 @@ class SafeUCB(BaseAquisition):
             # self.init_points = self.init_points[S]
 
         loss_perf = ucb if ucb.dim() == 1 else ucb[:, 0]
-        maxIdx = torch.argmax(loss_perf)
-        return [self.init_points[maxIdx], ucb[maxIdx]]
+        return loss_perf

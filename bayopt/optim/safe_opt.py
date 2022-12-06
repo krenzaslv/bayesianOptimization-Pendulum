@@ -63,6 +63,8 @@ class SafeOpt(BaseAquisition):
             self.G[s] = G_safe
 
         MG = torch.logical_or(self.M, self.G)
+        u[~MG] = -1e10
+        l[~MG] = -1e10
 
-        value = torch.max((u[MG] - l[MG]), axis=1)[0]
-        return [self.parameter_set[MG, :][torch.argmax(value), :], torch.argmax(value)]
+        value = torch.max((u - l), axis=1)[0]
+        return value
