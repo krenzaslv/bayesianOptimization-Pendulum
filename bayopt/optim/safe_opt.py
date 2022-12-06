@@ -13,7 +13,7 @@ class SafeOpt(BaseAquisition):
         self.M = self.S.clone()
         self.fmin = 0
 
-    def loss(self, x):
+    def forward(self, x):
         # Update confidence interval
         for i in range(self.dim):
             self.Q[:, 2*i] = x[i].mean - torch.sqrt(self.c.beta*x[i].variance)

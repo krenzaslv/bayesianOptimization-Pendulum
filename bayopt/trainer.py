@@ -23,7 +23,6 @@ class Trainer:
         yMin = -1e10*np.ones(loss.dim)  # Something small
 
         for i in track(range(0,self.config.n_opt_samples-1), description="Training..."):
-            loss.reset()
             
             # 2. Find next k
             if self.config.aquisition == "SafeOpt":
@@ -64,3 +63,4 @@ class Trainer:
                 train_y[i, :].detach(
                 ), loss_ucb.detach()
             )
+            loss.reset()

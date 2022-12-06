@@ -7,8 +7,8 @@ from gpytorch.models import IndependentModelList
 class ExactMultiTaskGP:
     def __init__(self, config, dim, train_x=None, train_y=None):
         self.dim = dim
-        train_x = torch.zeros(1, 2) if train_x is None else train_x
-        train_y = torch.zeros(1, dim) if train_y is None else train_y
+        train_x = torch.zeros(1, config.dim_params) if train_x is None else train_x
+        train_y = torch.zeros(1, config.dim_obs) if train_y is None else train_y
         self.train_x = train_x
         self.train_y = train_y
         self.config = config

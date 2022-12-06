@@ -15,3 +15,9 @@ def rand2d_torch(start1, end1, start2, end2, n):
     rand[:, 0] = rand_torch(start1, end1, n)[:]
     rand[:, 1] = rand_torch(start2, end2, n)[:]
     return rand
+
+def rand2n_torch(start1, end1, n, m):
+    rand = torch.zeros(n, m)
+    for i in range(m):
+        rand[:, i] = rand_torch(start1, end1, n)[:]
+    return rand

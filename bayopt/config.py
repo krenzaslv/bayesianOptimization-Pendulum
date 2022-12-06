@@ -20,6 +20,7 @@ class Config:
         self.aquisition = self.config.get("Optimization", "aquisition")
         self.set_size = self.config.getint("Optimization", "set_size")
         self.n_opt_samples = self.config.getint("Optimization", "n_opt_samples")
+        self.set_init= self.config.get("Optimization", "set_init")
 
         self.plotting_n_samples = self.config.getint("Plotting", "plotting_n_samples")
 

@@ -2,7 +2,7 @@ from gymnasium.envs.classic_control.pendulum import PendulumEnv
 import numpy as np
 import math
 
-from src.pendulum.GymPendulum import GymPendulum
+from bayopt.pendulum.GymPendulum import GymPendulum
 
 def simulate(config, dynamics, U):
     sim = simulate_sim if config.sim_type == "Sim" else simulate_gym

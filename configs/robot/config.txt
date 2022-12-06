@@ -11,13 +11,13 @@ dim_obs = 24
 dim_params = 2
 
 ;Aquisition must be one of [UCB, SafeUCB, SafeOpt]
-aquisition=SafeOpt
+aquisition=SafeUCB
 
 ; Domain bounds for Bayesian optimization
-domain_start_p=-4
-domain_end_p=4
-domain_start_d=-4
-domain_end_d=4
+domain_start_p=15
+domain_end_p=25
+domain_start_d=0
+domain_end_d=1
 
 ;Prior for the lenght scale of the Matern kernel
 init_lenghtscale = 0.5 
@@ -33,7 +33,10 @@ beta = 1
  ; Normalize Data
 normalize_data = False
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
-set_size = 100 
+set_size = 100
+
+; Initialization of grid [random, uniform]
+set_init = uniform 
 
 [Plotting]
 ; Number of linearly spaced samples for plotting
