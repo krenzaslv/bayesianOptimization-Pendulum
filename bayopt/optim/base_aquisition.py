@@ -35,12 +35,16 @@ class BaseAquisition(AnalyticAcquisitionFunction):
         return t
 
     def forward(self, X):
+        x = self.model.posterior(X)
+        return self.evaluate(x)
+
+    def evaluate(self, x):
         pass
 
     def getNextPoint(self):
         self.model.eval()
 
-        res = self.forward(self.model(self.parameter_set))
+        res = self.forward(self.parameter_set)
 
         nextX = self.parameter_set[torch.argmax(res)]
         loss = res.max()

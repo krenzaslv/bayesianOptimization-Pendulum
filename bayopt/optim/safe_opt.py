@@ -13,11 +13,10 @@ class SafeOpt(BaseAquisition):
         self.M = self.S.clone()
         self.fmin = 0
 
-    def forward(self, x):
+    def evaluate(self, X):
         # Update confidence interval
-        for i in range(self.dim):
-            self.Q[:, 2*i] = x[i].mean - torch.sqrt(self.c.beta*x[i].variance)
-            self.Q[:, 2*i+1] = x[i].mean + torch.sqrt(self.c.beta*x[i].variance)
+        self.Q[:, ::2] = X.mean - torch.sqrt(self.c.beta*X.variance)
+        self.Q[:, 1::2] = X.mean + torch.sqrt(self.c.beta*X.variance)
 
         # Compute Safe Set
         self.S[:] = torch.all(self.Q[:, 2::2] > self.fmin, axis=1)

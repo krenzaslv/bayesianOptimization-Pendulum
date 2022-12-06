@@ -8,7 +8,7 @@ class SafeUCB(BaseAquisition):
         self.fmin = 0
         self.dim = dim
 
-    def loss(self, x):
+    def evaluate(self, x):
         ucb = torch.zeros(x[0].mean.shape[0], self.dim)
         for i in range(self.dim):
             ucb[:, i] = x[i].mean + self.c.scale_beta*torch.sqrt(self.c.beta*x[i].variance)

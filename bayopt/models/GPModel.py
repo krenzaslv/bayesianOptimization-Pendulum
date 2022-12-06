@@ -1,10 +1,11 @@
+from botorch.models import ModelListGP
 import torch
 import gpytorch
 from torch.nn import Sequential, ReLU, Linear
 from gpytorch.models import IndependentModelList
 
 
-class ExactMultiTaskGP:
+class ExactMultiTaskGP(ModelListGP):
     def __init__(self, config, dim, train_x=None, train_y=None):
         self.dim = dim
         train_x = torch.zeros(1, config.dim_params) if train_x is None else train_x
@@ -14,14 +15,13 @@ class ExactMultiTaskGP:
         self.config = config
 
         self.setUpModels(dim, train_x, train_y)
+        super(ModelListGP, self).__init__(*self.models)
 
     def setUpModels(self, dim, train_x, train_y):
         self.models = []
         for i in range(dim):
             model = ExactGPModel(self.config, train_x, train_y[:, i])
             self.models.append(model)
-
-        self.model = IndependentModelList(*self.models)
 
     def state_dict(self):
         return [model.state_dict() for model in self.models]
@@ -35,11 +35,9 @@ class ExactMultiTaskGP:
         self.model = IndependentModelList(*self.models)
 
     def forward(self, x):
-        inp = [x for i in range(self.dim)]
-        return self.model(*inp)
+        # inp = [x for i in range(self.dim)]
+        return super(ModelListGP, self).forward(x)
 
-    def __call__(self, x):
-        return self.forward(x)
 
     def eval(self):
         for i in range(self.dim):
