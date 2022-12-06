@@ -7,25 +7,30 @@ class SafeOpt(BaseAquisition):
     def __init__(self, model, t, c, logger, dim):
         super().__init__(model, t, c, logger, dim)
 
-        self.Q = torch.empty(self.parameter_set.shape[0], 2*dim)
-        self.S = torch.zeros(self.parameter_set.shape[0], dtype=bool)
+    def evaluate(self, X):
+        self.Q = torch.empty(X.mean.shape[0], 2*self.dim)
+        self.S = torch.zeros(X.mean.shape[0], dtype=bool)
         self.G = self.S.clone()
         self.M = self.S.clone()
         self.fmin = 0
 
-    def evaluate(self, X):
         # Update confidence interval
-        self.Q[:, ::2] = X.mean - torch.sqrt(self.c.beta*X.variance)
-        self.Q[:, 1::2] = X.mean + torch.sqrt(self.c.beta*X.variance)
+        mean  = X.mean.reshape(-1, self.dim)
+        var = X.variance.reshape(-1, self.dim)
+        self.Q[:, ::2] = mean - torch.sqrt(self.c.beta*var)
+        self.Q[:, 1::2] = mean + torch.sqrt(self.c.beta*var)
 
         # Compute Safe Set
         self.S[:] = torch.all(self.Q[:, 2::2] > self.fmin, axis=1)
 
-        if not torch.any(self.S):
-            print("Couldnt find safe set")
-
         # Set of maximisers
         l, u = self.Q[:, :2].T
+
+        if not torch.any(self.S):
+            print("Couldnt find safe set")
+            return torch.max(X.mean[:,0])
+
+
 
         self.M[:] = False
         self.M[self.S] = u[self.S] >= torch.max(l[self.S], dim=0)[0]

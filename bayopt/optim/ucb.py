@@ -9,9 +9,7 @@ class UCB(BaseAquisition):
         self.dim = dim
 
     def evaluate(self, x):
-        ucb = torch.zeros(x[0].mean.shape[0], self.dim)
-        for i in range(self.dim):
-            ucb[:, i] = x[i].mean + self.c.scale_beta*torch.sqrt(self.c.beta*x[i].variance)
+        ucb = x.mean + self.c.scale_beta*torch.sqrt(self.c.beta*x.variance)
 
         loss_perf = ucb if ucb.dim() == 1 else ucb[:, 0]
         return loss_perf

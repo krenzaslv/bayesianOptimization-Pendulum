@@ -8,10 +8,10 @@ n_opt_samples = 50
 
 ; Dimension of parameters
 dim_obs = 24
-dim_params = 2
+dim_params = 6
 
 ;Aquisition must be one of [UCB, SafeUCB, SafeOpt]
-aquisition=SafeUCB
+aquisition=SafeOpt
 
 ; Domain bounds for Bayesian optimization
 domain_start_p=15
@@ -33,10 +33,10 @@ beta = 1
  ; Normalize Data
 normalize_data = False
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
-set_size = 100
+set_size = 1000
 
 ; Initialization of grid [random, uniform]
-set_init = uniform 
+set_init = random
 
 [Plotting]
 ; Number of linearly spaced samples for plotting
