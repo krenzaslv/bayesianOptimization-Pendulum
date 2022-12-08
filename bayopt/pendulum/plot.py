@@ -181,10 +181,11 @@ class PlotPendulum:
 
         inp = self.createGrid().reshape(-1, 2)
         with torch.autograd.no_grad():
-            out = model(inp)
+            out = model.posterior(inp)
 
-        var = torch.cat([x.variance.reshape(-1, 1) for x in out], 1).detach().numpy()
-        mean = torch.cat([x.mean.reshape(-1, 1) for x in out], 1).detach()
+        mean = out.mean.detach() #torch.cat([x.mean.reshape(-1, 1) for x in out], 1).detach()
+        var = out.variance.detach().numpy() #torch.cat([x.variance.reshape(-1, 1) for x in out], 1).detach().numpy()
+        print(mean)
         # var = out[0].variance.detach().numpy()
         # mean = out[0].mean.detach().repeat(len(out),1).T
 

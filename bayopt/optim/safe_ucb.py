@@ -13,7 +13,7 @@ class SafeUCB(BaseAquisition):
 
         # UPC-Safe
         l = x.mean - self.c.scale_beta*torch.sqrt(self.c.beta*x.variance)
-        S = torch.any(l.le(self.fmin), axis=1)
+        S = torch.any(l[:, 1:].le(self.fmin), axis=1)
 
         ucb[S] = -1e10
         # self.init_points = self.init_points[S]

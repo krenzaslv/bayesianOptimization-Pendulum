@@ -44,7 +44,6 @@ class Trainer:
             [x_k, y_k, X_bo] = loss.evaluate(k)
             [train_x[i, :], train_y[i, :]] = [x_k, y_k]
 
-
             # 1. Update GP
             train_x_n = train_x[: i + 1]
             train_y_n = train_y[: i + 1]
@@ -52,11 +51,11 @@ class Trainer:
 
 
             if torch.any(y_k[1:] < 0):
-                print("[yellow][Warning][/yellow] Constraint violated at iteration {} with {}".format(i, y_k))
+                print("[yellow][Warning][/yellow] Constraint violated at iteration {} with {} at {}".format(i, y_k, k))
 
             if y_k[0] > yMin[0]:
                 yMin = y_k
-                print("[green][Info][/green] New minimum at Iteration: {}, yMin: {}".format(i, yMin))
+                print("[green][Info][/green] New minimum at Iteration: {},yMin:{} at {}".format(i, yMin, k))
 
             self.logger.log(
                 model, i - 1, safePoints.shape[0], X_bo, train_x[i, :],

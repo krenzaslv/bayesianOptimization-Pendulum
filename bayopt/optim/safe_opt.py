@@ -49,7 +49,9 @@ class SafeOpt(BaseAquisition):
             G_safe = torch.zeros(torch.count_nonzero(s), dtype=bool)
             sort_index = torch.max(u[s, :] - l[s, :], axis=1)[0].argsort()
             for index in reversed(sort_index):
+                i = 0
                 for model in self.model.models[1:]:
+                    i += 1
                     fModel = ExactGPModel(self.c,
                                           torch.cat(
                                               (model.train_x, self.parameter_set[s][index].reshape(1, -1))),
