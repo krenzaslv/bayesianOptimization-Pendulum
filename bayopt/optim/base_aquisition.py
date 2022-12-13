@@ -25,13 +25,13 @@ class BaseAquisition(MCAcquisitionFunction):
 
     def getInitPoints(self):
         if self.c.set_init == "random":
-            t = rand2n_torch(self.c.domain_start_p, self.c.domain_end_p,
+            t = rand2n_torch(self.c.domain_start, self.c.domain_end,
                              self.c.set_size, self.c.dim_params)
         else:
             init_points = []
             for i in range(self.c.dim_params):
-                init_points.append(torch.linspace(self.c.domain_start_p,
-                                   self.c.domain_end_p, self.c.set_size))
+                init_points.append(torch.linspace(self.c.domain_start[i],
+                                   self.c.domain_end[i], self.c.set_size))
             X = torch.meshgrid(init_points, indexing="xy")
             init = torch.stack(X, dim=2)
             init = torch.reshape(init, (-1, self.c.dim_params))

@@ -1,4 +1,5 @@
 from configparser import ConfigParser
+import numpy as np
 
 
 class Config:
@@ -7,10 +8,8 @@ class Config:
         self.config.readfp(open(path))
 
         self.scale_beta = self.config.getfloat("Optimization", "scale_beta")
-        self.domain_start_p = self.config.getfloat("Optimization", "domain_start_p")
-        self.domain_start_d = self.config.getfloat("Optimization", "domain_start_d")
-        self.domain_end_p = self.config.getfloat("Optimization", "domain_end_p")
-        self.domain_end_d = self.config.getfloat("Optimization", "domain_end_d")
+        self.domain_start = np.fromstring(self.config.get("Optimization", "domain_start"), sep=',')
+        self.domain_end = np.fromstring(self.config.get("Optimization", "domain_end"), sep=',')
         self.init_lenghtscale = self.config.getfloat("Optimization", "init_lenghtscale")
         self.init_variance = self.config.getfloat("Optimization", "init_variance")
         self.normalize_data = self.config.getboolean("Optimization", "normalize_data")
@@ -20,7 +19,7 @@ class Config:
         self.aquisition = self.config.get("Optimization", "aquisition")
         self.set_size = self.config.getint("Optimization", "set_size")
         self.n_opt_samples = self.config.getint("Optimization", "n_opt_samples")
-        self.set_init= self.config.get("Optimization", "set_init")
+        self.set_init = self.config.get("Optimization", "set_init")
 
         self.plotting_n_samples = self.config.getint("Plotting", "plotting_n_samples")
 
