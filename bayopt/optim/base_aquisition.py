@@ -33,6 +33,7 @@ class BaseAquisition(MCAcquisitionFunction):
                 init_points.append(torch.linspace(self.c.domain_start[i],
                                    self.c.domain_end[i], self.c.set_size))
             X = torch.meshgrid(init_points, indexing="xy")
+            print(X)
             init = torch.stack(X, dim=2)
             init = torch.reshape(init, (-1, self.c.dim_params))
 
@@ -51,8 +52,8 @@ class BaseAquisition(MCAcquisitionFunction):
 
     def optimize(self):
         bounds = torch.zeros(2, self.c.dim_params)
-        bounds[0, :] = self.c.domain_start_p
-        bounds[1, :] = self.c.domain_end_p
+        bounds[0, :] = torch.from_numpy(self.c.domain_start)
+        bounds[1, :] = torch.from_numpy(self.c.domain_end)
         # Xinit = gen_batch_initial_conditions(
         # self, bounds, q=10000, num_restarts=1, raw_samples=1
         # )

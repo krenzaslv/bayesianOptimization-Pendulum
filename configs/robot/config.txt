@@ -4,21 +4,21 @@ save_file = data.txt
 
 [Optimization]
  ; Number of Bayesian Optimization steps
-n_opt_samples = 50 
+n_opt_samples = 200
 
 ; Dimension of parameters
 dim_obs = 24
-dim_params = 2
+dim_params = 8
 
 ;Aquisition must be one of [UCB, SafeUCB, SafeOpt]
 aquisition=SafeOpt
 
 ; Domain bounds for Bayesian optimization
-domain_start=0,0
-domain_end=10,5
+domain_start=0,0,0,0,0,0,0,0
+domain_end=30,1,30,1,30,1,30,1
 
 ;Prior for the lenght scale of the Matern kernel
-init_lenghtscale = 0.05
+init_lenghtscale = 0.5
 
 ;Variance of likelihood
 init_variance = 0.0001 
@@ -31,7 +31,7 @@ beta = 1
  ; Normalize Data
 normalize_data = False
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
-set_size = 200 
+set_size = 3 
 
 ; Initialization of grid [random, uniform]
 set_init = uniform 
