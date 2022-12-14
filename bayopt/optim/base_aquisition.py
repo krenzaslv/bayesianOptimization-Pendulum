@@ -33,7 +33,6 @@ class BaseAquisition(MCAcquisitionFunction):
                 init_points.append(torch.linspace(self.c.domain_start[i],
                                    self.c.domain_end[i], self.c.set_size))
             X = torch.meshgrid(init_points, indexing="xy")
-            print(X)
             init = torch.stack(X, dim=2)
             init = torch.reshape(init, (-1, self.c.dim_params))
 
