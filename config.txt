@@ -18,7 +18,7 @@ domain_start=0,0
 domain_end=10,10
 
 ;Prior for the lenght scale of the Matern kernel
-init_lenghtscale = 1.0
+init_lenghtscale = 2
 
 ;Variance of likelihood
 init_variance = 0.0001 

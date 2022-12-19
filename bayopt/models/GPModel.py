@@ -6,46 +6,36 @@ from gpytorch.models import IndependentModelList
 
 
 class ExactMultiTaskGP(ModelListGP):
-    def __init__(self, config, dim, train_x=None, train_y=None):
-        self.dim = dim
+    def __init__(self, config, train_x=None, train_y=None):
+        self.c= config
+        print(train_x)
         train_x = torch.zeros(1, config.dim_params) if train_x is None else train_x
         train_y = torch.zeros(1, config.dim_obs) if train_y is None else train_y
         self.train_x = train_x
         self.train_y = train_y
         self.config = config
 
-        self.setUpModels(dim, train_x, train_y)
-        super(ModelListGP, self).__init__(*self.models)
+        models = self.setUpModels(train_x, train_y)
+        super(ModelListGP, self).__init__(*models)
 
-    def setUpModels(self, dim, train_x, train_y):
-        self.models = []
-        for i in range(dim):
+    def setUpModels(self, train_x, train_y):
+        models = []
+        for i in range(self.c.dim_obs):
             model = ExactGPModel(self.config, train_x, train_y[:, i])
-            self.models.append(model)
-
-    def state_dict(self):
-        return [model.state_dict() for model in self.models]
-
-    def load_state_dict(self, config, state_dict_list):
-        self.models = []
-        for state_dict in state_dict_list:
-            model = ExactGPModel(config)
-            model.load_state_dict(state_dict)
-            self.models.append(model)
-        self.model = IndependentModelList(*self.models)
+            models.append(model)
+        return models
 
     def forward(self, x):
-        # inp = [x for i in range(self.dim)]
         return super(ModelListGP, self).forward(x)
 
 
     def eval(self):
-        for i in range(self.dim):
+        for i in range(self.c.dim_obs):
             self.models[i].eval()
 
     def updateModel(self, train_x, train_y):
         # self.setUpModels(self.dim, train_x, train_y)
-        for i in range(self.dim):
+        for i in range(self.c.dim_obs):
             self.train_x = train_x
             self.train_y = train_y
             self.models[i].updateModel(train_x, train_y[:, i])
