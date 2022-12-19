@@ -6,11 +6,11 @@ from gpytorch.models import IndependentModelList
 
 
 class ExactMultiTaskGP(ModelListGP):
-    def __init__(self, config, train_x=None, train_y=None):
+    def __init__(self, config, dim_loss, train_x=None, train_y=None):
         self.c= config
-        print(train_x)
+        self.dim_loss = dim_loss
         train_x = torch.zeros(1, config.dim_params) if train_x is None else train_x
-        train_y = torch.zeros(1, config.dim_obs) if train_y is None else train_y
+        train_y = torch.zeros(1, dim_loss) if train_y is None else train_y
         self.train_x = train_x
         self.train_y = train_y
         self.config = config
@@ -20,7 +20,7 @@ class ExactMultiTaskGP(ModelListGP):
 
     def setUpModels(self, train_x, train_y):
         models = []
-        for i in range(self.c.dim_obs):
+        for i in range(self.dim_loss):
             model = ExactGPModel(self.config, train_x, train_y[:, i])
             models.append(model)
         return models
@@ -30,12 +30,12 @@ class ExactMultiTaskGP(ModelListGP):
 
 
     def eval(self):
-        for i in range(self.c.dim_obs):
+        for i in range(self.dim_loss):
             self.models[i].eval()
 
     def updateModel(self, train_x, train_y):
         # self.setUpModels(self.dim, train_x, train_y)
-        for i in range(self.c.dim_obs):
+        for i in range(self.dim_loss):
             self.train_x = train_x
             self.train_y = train_y
             self.models[i].updateModel(train_x, train_y[:, i])
@@ -52,8 +52,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         self.config = config
         self.mean_module = gpytorch.means.ZeroMean()
-        self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.MaternKernel())
-        self.covar_module.base_kernel.lengthscale = config.init_lenghtscale
+        self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.MaternKernel(ard_num_dims=8,has_lengthscale=True))
+        self.covar_module.base_kernel.lengthscale = torch.from_numpy(config.init_lenghtscale)
         self.train_x = train_x
         self.train_y = train_y
 

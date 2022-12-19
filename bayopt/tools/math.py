@@ -13,6 +13,8 @@ def clamp2dTensor(inp, lower, upper):
 
     return inp
 
+def scale(X, s):
+    return X/s
 
 def angleDiff(a, b):
     c = b - a

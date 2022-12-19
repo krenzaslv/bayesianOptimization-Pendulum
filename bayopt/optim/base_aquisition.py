@@ -3,6 +3,7 @@ import torch
 from torch.autograd import Variable
 from rich import print
 from bayopt.tools.rand import rand2n_torch
+from bayopt.tools.math import scale
 from botorch.acquisition import AcquisitionFunction, AnalyticAcquisitionFunction, MCAcquisitionFunction
 from botorch.optim.initializers import gen_batch_initial_conditions
 from botorch.generation.gen import gen_candidates_scipy
@@ -23,7 +24,7 @@ class BaseAquisition(MCAcquisitionFunction):
         self.dim = dim
         self.n_double = 0
         self.X_pending = None
-        self.maxIter = 1000
+        self.maxIter = 10
 
     def getInitPoints(self):
         if self.c.set_init == "random":
@@ -77,9 +78,10 @@ class BaseAquisition(MCAcquisitionFunction):
         xInit = self.getInitPoints()
         pInit = copy.deepcopy(xInit)
         vbounds = torch.tensor([0.1])
-        vInit = rand2n_torch(-vbounds.repeat(xInit.shape[1], 1), vbounds.repeat(xInit.shape[1], 1), xInit.shape[0], xInit.shape[1])
+        vInit = rand2n_torch(-vbounds.repeat(xInit.shape[1], 1), vbounds.repeat(
+            xInit.shape[1], 1), xInit.shape[0], xInit.shape[1])
 
-        self.points = xInit 
+        self.points = xInit
         res = self.forward(xInit)
 
         fBest = res.max()
@@ -90,8 +92,11 @@ class BaseAquisition(MCAcquisitionFunction):
 
             for j in range(100):
                 xInit += vInit
-                self.points = xInit 
-                xInit = clamp2dTensor(xInit, self.c.domain_start, self.c.domain_end)
+                self.points = xInit
+                # TODO make better
+                xInit = clamp2dTensor(scale(xInit, self.c.domain_end-self.c.domain_start), 0,
+                                      1) if self.c.normalize_data else clamp2dTensor(xInit, self.c.domain_start, self.c.domain_end)
+
                 resTmp = self.forward(xInit)
 
                 mask = resTmp > res
@@ -100,14 +105,15 @@ class BaseAquisition(MCAcquisitionFunction):
 
                 pInit[mask] = xInit[mask]
 
-                vInit = rand2n_torch(-vbounds.repeat(xInit.shape[1], 1), vbounds.repeat(xInit.shape[1], 1), xInit.shape[0], xInit.shape[1])
+                vInit = rand2n_torch(-vbounds.repeat(xInit.shape[1], 1), vbounds.repeat(
+                    xInit.shape[1], 1), xInit.shape[0], xInit.shape[1])
 
-                i += 1
+
+            i += 1
 
         if not self.hasSafePoints(xInit):
             print("Could not find safe set")
         fBest = res.max()
-        pBest = xInit[torch.argmax(res)]
 
         return [pBest, fBest]
 
@@ -138,5 +144,5 @@ class BaseAquisition(MCAcquisitionFunction):
             if self.model.models[0].train_inputs[0].shape[0] - self.n_double != self.model.models[0].train_inputs[0].unique(dim=0).shape[0]:
                 print("[yellow][Warning][/yellow] Already sampled {}".format(nextX))
                 self.n_double += 1
-        print("nextX: {}".format(nextX))
+        print("nextX: {}/{}".format(scale(nextX, self.c.domain_end-self.c.domain_start), nextX))
         return [nextX, loss]

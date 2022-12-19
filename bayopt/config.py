@@ -10,7 +10,7 @@ class Config:
         self.scale_beta = self.config.getfloat("Optimization", "scale_beta")
         self.domain_start = np.fromstring(self.config.get("Optimization", "domain_start"), sep=',')
         self.domain_end = np.fromstring(self.config.get("Optimization", "domain_end"), sep=',')
-        self.init_lenghtscale = self.config.getfloat("Optimization", "init_lenghtscale")
+        self.init_lenghtscale = np.fromstring(self.config.get("Optimization","init_lenghtscale"), sep=',')
         self.init_variance = self.config.getfloat("Optimization", "init_variance")
         self.normalize_data = self.config.getboolean("Optimization", "normalize_data")
         self.beta = self.config.getfloat("Optimization", "beta")
