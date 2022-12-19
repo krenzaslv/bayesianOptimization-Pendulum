@@ -21,6 +21,8 @@ class Config:
         self.n_opt_samples = self.config.getint("Optimization", "n_opt_samples")
         self.set_init = self.config.get("Optimization", "set_init")
 
+        self.acf_optim = self.config.get("Optimization", "acf_optim")
+
         self.plotting_n_samples = self.config.getint("Plotting", "plotting_n_samples")
 
         self.seed = self.config.getint("General", "seed")

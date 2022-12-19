@@ -33,8 +33,8 @@ class PlotPendulum:
         self.ax3.clear()
         self.ax4.clear()
         self.ax5.clear()
-        self.ax.set_ylim(self.config.domain_start_d, self.config.domain_end_d)
-        self.ax.set_xlim(self.config.domain_start_p, self.config.domain_end_p)
+        self.ax.set_ylim(self.config.domain_start[0], self.config.domain_end[0])
+        self.ax.set_xlim(self.config.domain_start[1], self.config.domain_end[1])
         self.ax.set_ylabel("kp")
         self.ax.set_xlabel("kd")
         self.ax.set_zlabel("f(x)")
@@ -47,17 +47,19 @@ class PlotPendulum:
         self.ax3.set_ylim(-4, 4)
         self.ax2.set_ylim(-4, 10)
         self.ax3.set_ylim(-4, 4)
-        self.ax5.axis('equal')
+        self.ax5.set_xlim(self.config.domain_start[0], self.config.domain_end[0])
+        self.ax5.set_ylim(self.config.domain_start[1], self.config.domain_end[1])
+        # self.ax5.axis('equal')
 
     def createGrid(self):
         grid_x = torch.linspace(
-            self.config.domain_start_p,
-            self.config.domain_end_p,
+            self.config.domain_start[0],
+            self.config.domain_end[0],
             self.config.plotting_n_samples,
         )
         grid_y = torch.linspace(
-            self.config.domain_start_d,
-            self.config.domain_end_d,
+            self.config.domain_start[1],
+            self.config.domain_end[1],
             self.config.plotting_n_samples,
         )
         grid_x, grid_y = torch.meshgrid(grid_x, grid_y, indexing="xy")
@@ -185,7 +187,6 @@ class PlotPendulum:
 
         mean = out.mean.detach() #torch.cat([x.mean.reshape(-1, 1) for x in out], 1).detach()
         var = out.variance.detach().numpy() #torch.cat([x.variance.reshape(-1, 1) for x in out], 1).detach().numpy()
-        print(mean)
         # var = out[0].variance.detach().numpy()
         # mean = out[0].mean.detach().repeat(len(out),1).T
 

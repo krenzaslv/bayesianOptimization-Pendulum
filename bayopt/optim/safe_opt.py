@@ -15,7 +15,7 @@ class SafeOpt(BaseAquisition):
         self.fmin = 0
 
         # Update confidence interval
-        mean  = X.mean.reshape(-1, self.dim)
+        mean = X.mean.reshape(-1, self.dim)
         var = X.variance.reshape(-1, self.dim)
         self.Q[:, ::2] = mean - torch.sqrt(self.c.beta*var)
         self.Q[:, 1::2] = mean + torch.sqrt(self.c.beta*var)
@@ -27,10 +27,8 @@ class SafeOpt(BaseAquisition):
         l, u = self.Q[:, :2].T
 
         if not torch.any(self.S):
-            print("Couldnt find safe set")
-            return torch.max(X.mean[:,0])
-
-
+            # print("Couldnt find safe set")
+            return -1e10*torch.ones_like(X.mean[:, 0])
 
         self.M[:] = False
         self.M[self.S] = u[self.S] >= torch.max(l[self.S], dim=0)[0]
@@ -43,7 +41,6 @@ class SafeOpt(BaseAquisition):
         s[s.clone()] = (torch.max((u[s, :] - l[s, :]), axis=1)[0] > max_var)
         s[s.clone()] = torch.any(u[s, :] - l[s, :] > self.fmin, axis=1)
 
-        y = torch.ones_like(self.parameter_set)
         if (torch.any(s)):
             # set of safe expanders
             G_safe = torch.zeros(torch.count_nonzero(s), dtype=bool)
@@ -53,9 +50,9 @@ class SafeOpt(BaseAquisition):
                 for model in self.model.models[1:]:
                     i += 1
                     fModel = ExactGPModel(self.c,
-                                          torch.cat(
-                                              (model.train_x, self.parameter_set[s][index].reshape(1, -1))),
-                                          torch.cat((model.train_y, u[s, i][index].flatten())))
+                                          torch.cat((model.train_x,self.points[s][index].reshape(1,-1))),
+                                          torch.cat((model.train_y, u[s, i][index].flatten()))
+                                          )
                     fModel.eval()
 
                     pred = fModel(model.train_x)
@@ -69,7 +66,6 @@ class SafeOpt(BaseAquisition):
             self.G[s] = G_safe
 
         MG = torch.logical_or(self.M, self.G)
-
         value = torch.max((u - l), axis=1)[0]
         value[~MG] = -1e10
         return value
