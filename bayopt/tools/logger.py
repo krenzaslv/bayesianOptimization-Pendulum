@@ -34,7 +34,7 @@ class Logger:
         if i == self.c.n_opt_samples - 1 - offset:
             self.writer.add_hparams(
                 {
-                    "init_lenghtscale": self.c.init_lenghtscale,
+                    "init_lenghtscale": torch.from_numpy(self.c.init_lenghtscale),
                     "aquisition": self.c.aquisition,
                     "init_variance": self.c.init_variance,
                     "n_opt_samples": self.c.n_opt_samples,

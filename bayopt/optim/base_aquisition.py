@@ -24,7 +24,7 @@ class BaseAquisition(MCAcquisitionFunction):
         self.dim = dim
         self.n_double = 0
         self.X_pending = None
-        self.maxIter = 100
+        self.maxIter = 10
 
     def getInitPoints(self):
         if self.c.set_init == "random":
@@ -90,6 +90,9 @@ class BaseAquisition(MCAcquisitionFunction):
         while i < self.maxIter and not self.hasSafePoints(xInit):
             xInit = self.getInitPoints()
 
+            if i > 0:
+                print("[green][Info][/green] Did not find safe set at iteration {}.".format(i-1))
+
             for j in range(100):
                 xInit += vInit
                 self.points = xInit
@@ -97,7 +100,7 @@ class BaseAquisition(MCAcquisitionFunction):
                 xInit = clamp2dTensor(scale(xInit, self.c.domain_end-self.c.domain_start), 0,
                                       1) if self.c.normalize_data else clamp2dTensor(xInit, self.c.domain_start, self.c.domain_end)
 
-                resTmp = self.forward(xInit)
+                resTmp = self.forward(xInit).detach()
 
                 mask = resTmp > res
 
@@ -112,7 +115,7 @@ class BaseAquisition(MCAcquisitionFunction):
             i += 1
 
         if not self.hasSafePoints(xInit):
-            print("Could not find safe set")
+            print("[yellow][Warning][/yellow] Could not find safe set")
         fBest = res.max()
 
         return [pBest, fBest]
