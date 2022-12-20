@@ -50,9 +50,9 @@ class PendulumErrorWithConstraintRandomInit(Loss):
             X_star = simulate(config, dynamics_ideal, U_star)
 
             norm += (0.2 - np.linalg.norm(X_star-X_bo)/np.sqrt(self.c.n_simulation))/self.N
-            c1 += (np.pi*np.pi/ 4- np.max((X_star[:, 0] - X_bo[:, 0])**2))/self.N
+            c1 += (np.pi*np.pi/ 8- np.max((X_star[:, 0] - X_bo[:, 0])**2))/self.N
             # c2 += (np.pi*np.pi - np.max((X_star[:, 1] - X_bo[:, 1])**2))/self.N
-            c2 += (5 - np.max(np.abs(X_bo[:, 1])))/self.N
+            c2 += (3 - np.max(np.abs(X_bo[:, 1])))/self.N
 
         return [torch.tensor([k[0], k[1]]), torch.tensor([norm, c1, c2]), X_bo]
 
@@ -80,8 +80,8 @@ class PendulumErrorWithConstraint(Loss):
         norm = self.init_norm - np.linalg.norm(self.X_star - X_bo)/np.sqrt(self.c.n_simulation)
         # # c1 = self.init_norm + 0.5*norm
         # c1 = np.max((self.X_star[:,0] - X_bo[:,0])**2)
-        c1 = np.pi*np.pi/4 - np.max((self.X_star[:, 0] - X_bo[:, 0])**2)
-        c2 = np.pi*np.pi/4 - np.max((self.X_star[:, 1] - X_bo[:, 1])**2)
+        c1 = np.pi - np.max((self.X_star[:, 0] - X_bo[:, 0])**2)
+        c2 = np.pi - np.max((self.X_star[:, 1] - X_bo[:, 1])**2)
         # c3 = (np.absolute(k[1]) -3)
 
         return [torch.tensor([k[0], k[1]]), torch.tensor([norm, c1, c2]), X_bo]

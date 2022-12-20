@@ -24,7 +24,7 @@ class BaseAquisition(MCAcquisitionFunction):
         self.dim = dim
         self.n_double = 0
         self.X_pending = None
-        self.maxIter = 10
+        self.maxIter = 100
 
     def getInitPoints(self):
         if self.c.set_init == "random":
@@ -77,7 +77,7 @@ class BaseAquisition(MCAcquisitionFunction):
     def optimizeSwarm(self):
         xInit = self.getInitPoints()
         pInit = copy.deepcopy(xInit)
-        vbounds = torch.tensor([0.1])
+        vbounds = torch.tensor([0.5])
         vInit = rand2n_torch(-vbounds.repeat(xInit.shape[1], 1), vbounds.repeat(
             xInit.shape[1], 1), xInit.shape[0], xInit.shape[1])
 
@@ -144,5 +144,5 @@ class BaseAquisition(MCAcquisitionFunction):
             if self.model.models[0].train_inputs[0].shape[0] - self.n_double != self.model.models[0].train_inputs[0].unique(dim=0).shape[0]:
                 print("[yellow][Warning][/yellow] Already sampled {}".format(nextX))
                 self.n_double += 1
-        print("nextX: {}/{}".format(scale(nextX, self.c.domain_end-self.c.domain_start), nextX))
+        print("nextX: {}".format(nextX)) #scale(nextX, self.c.domain_end-self.c.domain_start), 
         return [nextX, loss]

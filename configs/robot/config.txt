@@ -18,7 +18,7 @@ domain_start=0,0,0,0,0,0,0,0
 domain_end=20,1,20,1,20,1,20,1
 
 ;Prior for the lenght scale of the Matern kernel
-init_lenghtscale = 0.5,0.1,0.5,0.1,0.5,0.1,0.5,0.1
+init_lenghtscale = 0.5,0.01,0.5,0.01,0.5,0.01,0.5,0.01
 
 ;Variance of likelihood
 init_variance = 0.0001 
@@ -32,7 +32,7 @@ beta = 3
 normalize_data = False
 
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
-set_size = 10000
+set_size = 100000
 
 ; Initialization of grid [random, uniform]
 set_init = random 
