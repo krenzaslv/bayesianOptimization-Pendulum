@@ -7,6 +7,7 @@ from bayopt.optim.ucb import UCB
 from bayopt.optim.safe_opt import SafeOpt
 from bayopt.tools.math import scale
 from bayopt.optim.safe_ucb import SafeUCB
+from bayopt.tools.data import Data
 from rich import print
 
 
@@ -16,13 +17,17 @@ class Trainer:
 
         self.logger = Logger(config)
 
+        self.data = Data(config)
+
     def train(self, loss, model, safePoints):
-        train_x = torch.zeros(self.config.n_opt_samples +
-                              safePoints.shape[0], self.config.dim_params)
-        train_y = torch.zeros(self.config.n_opt_samples + safePoints.shape[0], loss.dim)
+        # train_x = torch.zeros(self.config.n_opt_samples +
+        #                       safePoints.shape[0], self.config.dim_params)
+        # train_y = torch.zeros(self.config.n_opt_samples + safePoints.shape[0], loss.dim)
         k = np.zeros(self.config.dim_params)
 
         yMin = -1e10*np.ones(loss.dim)  # Something small
+
+        state_dict = None
 
         for i in track(range(0, self.config.n_opt_samples-1), description="Training..."):
 
@@ -34,23 +39,16 @@ class Trainer:
             else:
                 aquisition = UCB
 
-            aquisition = aquisition(model, i,
-                                    self.config, self.logger.writer, loss.dim)
-
             if i < safePoints.shape[0]:
                 [k, loss_ucb] = [safePoints[i], torch.tensor([0])]
             else:
+                gp = model(self.config, self.data, state_dict)
+                aquisition = aquisition(gp, self.data, self.config, loss.dim)
                 [k, loss_ucb] = aquisition.getNextPoint()
 
             # 3. Evaluate new k
             [x_k, y_k, X_bo] = loss.evaluate(k)
-            [train_x[i, :], train_y[i, :]] = [x_k, y_k]
-
-            # 1. Update GP
-            train_x_n = scale(train_x[: i + 1], self.config.domain_end -
-                              self.config.domain_start) if self.config.normalize_data else train_x[: i + 1]
-            train_y_n = train_y[: i + 1]
-            model.updateModel(train_x_n, train_y_n)
+            self.data.append_data(x_k.reshape(1,-1), y_k.reshape(1, -1))
 
             if torch.any(y_k[1:] < 0):
                 print(
@@ -60,9 +58,9 @@ class Trainer:
                 yMin = y_k
                 print("[green][Info][/green] New minimum at Iteration: {},yMin:{} at {}".format(i, yMin, k))
 
-            self.logger.log(
-                model, i - 1, safePoints.shape[0], X_bo, train_x[i, :],
-                train_y[i, :].detach(
-                ), loss_ucb.detach()
-            )
+            # self.logger.log(
+            #     model, i - 1, safePoints.shape[0], X_bo, train_x[i, :],
+            #     train_y[i, :].detach(
+            #     ), loss_ucb.detach()
+            # )
             loss.reset()

@@ -16,6 +16,9 @@ def clamp2dTensor(inp, lower, upper):
 def scale(X, s):
     return X/s
 
+def iScale(X, s):
+    return X*s
+
 def angleDiff(a, b):
     c = b - a
     return (c + math.pi) % (2 * math.pi) - math.pi

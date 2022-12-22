@@ -3,8 +3,8 @@ import torch
 
 
 class UCB(BaseAquisition):
-    def __init__(self, model, t, c, logger, dim):
-        super().__init__(model, t, c, logger, dim)
+    def __init__(self, model, data, c, dim):
+        super().__init__(model, data, c, dim)
         self.fmin = 0
         self.dim = dim
 

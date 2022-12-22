@@ -29,7 +29,7 @@ scale_beta = 0.2
 beta = 1
 
 ; Normalize Data
-normalize_data = False
+normalize_data = False 
 
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
 set_size = 10000

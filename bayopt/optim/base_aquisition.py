@@ -17,15 +17,13 @@ import copy
 
 class BaseAquisition(MCAcquisitionFunction):
 
-    def __init__(self, model, t, c, logger, dim):
+    def __init__(self, model, data, c, dim):
         super(MCAcquisitionFunction, self).__init__(model=model)
         self.model = model
-        self.t = t + 1
         self.c = c
-        self.logger = logger
         self.dim = dim
         self.n_double = 0
-        self.X_pending = None
+        self.data = data
 
     def getInitPoints(self):
         if self.c.set_init == "random":
@@ -109,8 +107,7 @@ class BaseAquisition(MCAcquisitionFunction):
                 
                 # Update swarm position
                 x += v
-                x = clamp2dTensor(scale(x, self.c.domain_end-self.c.domain_start), 0,
-                                  1) if self.c.normalize_data else clamp2dTensor(x, self.c.domain_start, self.c.domain_end)
+                x = clamp2dTensor(x, self.c.domain_start, self.c.domain_end)
 
                 with torch.no_grad():
                     resTmp = self.forward(x)

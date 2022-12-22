@@ -122,7 +122,7 @@ def train_gym(
     # Pendulum dependent dynamics and losses
     loss = PendulumErrorWithConstraintRandomInit(config_pendulum)
 
-    model = ExactMultiTaskGP(config, loss.dim)
+    model = ExactMultiTaskGP
 
     x_safe = torch.tensor([[0, 0]])  # ,[0.5,0.5], [-0.5,-0.5], [-0.5,0.5],[0.5,-0.5]])
     trainer = Trainer(config)

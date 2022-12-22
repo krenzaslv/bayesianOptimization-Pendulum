@@ -1,11 +1,11 @@
 from bayopt.optim.base_aquisition import BaseAquisition
-from bayopt.models.GPModel import ExactGPModel
+from bayopt.models.GPModel import ExactGPModel, ExactMultiTaskGP
 import torch
 
 
 class SafeOpt(BaseAquisition):
-    def __init__(self, model, t, c, logger, dim):
-        super().__init__(model, t, c, logger, dim)
+    def __init__(self, model, data, c, dim):
+        super().__init__(model, data, c, dim)
 
     def evaluate(self, X):
         self.Q = torch.empty(X.mean.shape[0], 2*self.dim)
@@ -51,19 +51,13 @@ class SafeOpt(BaseAquisition):
             G_safe = torch.zeros(torch.count_nonzero(s), dtype=bool)
             sort_index = torch.max(u[s, :] - l[s, :], axis=1)[0].argsort()
             for index in reversed(sort_index):
-                i = 1
-                # TODO this could be done nicer
-                for model in self.model.models[1:]:
-                    fModel = model.get_fantasy_model(
-                        self.points[s][index].reshape(1, -1), u[s, i][index].flatten())
-                    fModel.eval()
+                fModel = self.model.get_fantasy_model(self.points[s][index].reshape(1,-1),u[s][index].unsqueeze(-1))
+                fModel.eval()
 
-                    pred = fModel(self.points[~self.S])
-                    l2 = pred.mean.detach() - self.c.scale_beta*torch.sqrt(self.c.beta*pred.variance.detach())
-                    G_safe[index] = torch.any(l2 >= self.fmin)
-                    i += 1
-                    if not G_safe[index]:
-                        break
+                pred = fModel(self.points[~self.S])
+                l2 = pred.mean.detach() - self.c.scale_beta*torch.sqrt(self.c.beta*pred.variance.detach())
+                G_safe[index] = torch.any(torch.all(l2 >= self.fmin, dim=1))
+
                 if G_safe[index]:
                     break
 
@@ -72,4 +66,4 @@ class SafeOpt(BaseAquisition):
         MG = torch.logical_or(self.M, self.G)
         value = torch.max((u - l), axis=1)[0]
         value[~MG] = -1e10
-        return value
+        return value.double()
