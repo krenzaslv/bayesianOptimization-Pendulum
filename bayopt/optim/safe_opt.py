@@ -26,8 +26,9 @@ class SafeOpt(BaseAquisition):
             l = self.Q[:, 2::2]
             res = -1e10*torch.ones_like(X.mean[:, 0])
             safestPoint = torch.argmax(l.min(axis=1)[0])
-            res[safestPoint] = -1
+            res[safestPoint] = -1e5
             return res
+
         # Set of maximisers
         l, u = self.Q[:, :2].T
         self.M[:] = False
@@ -58,7 +59,7 @@ class SafeOpt(BaseAquisition):
                     fModel.eval()
 
                     pred = fModel(self.points[~self.S])
-                    l2 = pred.mean - self.c.scale_beta*torch.sqrt(self.c.beta*pred.variance)
+                    l2 = pred.mean.detach() - self.c.scale_beta*torch.sqrt(self.c.beta*pred.variance.detach())
                     G_safe[index] = torch.any(l2 >= self.fmin)
                     i += 1
                     if not G_safe[index]:

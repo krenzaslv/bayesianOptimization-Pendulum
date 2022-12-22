@@ -31,13 +31,24 @@ beta = 0.2
 ; Normalize Data
 normalize_data = False
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
-set_size = 200
+set_size = 10
 
 ; Initialization of grid [random, uniform]
-set_init = grid
+set_init = random
 
 ; Aquisition optimizer [opt, swarm , none]
-acf_optim = none
+acf_optim = swarm 
+
+; Iterations for swarmopt
+swarmopt_n_restarts = 10
+
+; Restarts for swarmopt
+swarmopt_n_iterations = 100
+
+; Swarmopt cognitive and social coefficient 
+swarmopt_p = 1 
+swarmopt_g = 1 
+swarmopt_w = 0.9
 
 [Plotting]
 ; Number of linearly spaced samples for plotting

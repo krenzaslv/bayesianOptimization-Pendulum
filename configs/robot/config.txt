@@ -4,7 +4,7 @@ save_file = data.txt
 
 [Optimization]
  ; Number of Bayesian Optimization steps
-n_opt_samples = 100
+n_opt_samples = 500
 
 ; Dimension of parameters
 dim_obs = 24
@@ -18,7 +18,7 @@ domain_start=0,0,0,0,0,0,0,0
 domain_end=20,1,20,1,20,1,20,1
 
 ;Prior for the lenght scale of the Matern kernel
-init_lenghtscale = 1.0,0.1,1.0,0.1,1.0,0.1,1.0,0.1
+init_lenghtscale = 0.5,0.1,0.5,0.1,0.5,0.1,0.5,0.1
 
 ;Variance of likelihood
 init_variance = 0.0001 
@@ -32,13 +32,24 @@ beta = 1
 normalize_data = False
 
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
-set_size = 100000
+set_size = 10000
 
 ; Initialization of grid [random, uniform]
 set_init = random 
 
 ; Aquisition optimizer [opt, swarm , none]
 acf_optim = swarm 
+
+; Iterations for swarmopt
+swarmopt_n_restarts = 10
+
+; Restarts for swarmopt
+swarmopt_n_iterations = 100
+
+; Swarmopt cognitive and social coefficient 
+swarmopt_p = 1 
+swarmopt_g = 1 
+swarmopt_w = 0.9
 
 [Plotting]
 ; Number of linearly spaced samples for plotting

@@ -10,6 +10,8 @@ from botorch.generation.gen import gen_candidates_scipy
 from botorch.optim.optimize import optimize_acqf
 from botorch.utils import t_batch_mode_transform
 from bayopt.tools.math import clamp2dTensor
+
+import numpy as np
 import copy
 
 
@@ -24,7 +26,6 @@ class BaseAquisition(MCAcquisitionFunction):
         self.dim = dim
         self.n_double = 0
         self.X_pending = None
-        self.maxIter = 10
 
     def getInitPoints(self):
         if self.c.set_init == "random":
@@ -47,6 +48,7 @@ class BaseAquisition(MCAcquisitionFunction):
     # @t_batch_mode_transform()
 
     def forward(self, X):
+        self.points = X
         x = self.model.posterior(X)
         return self.evaluate(x)
 
@@ -62,10 +64,9 @@ class BaseAquisition(MCAcquisitionFunction):
         # )
         # Xinit.reshape(1000,-1)
         # print(Xinit.shape)
-        Xinit = self.getInitPoints()
-        self.points = xInit
+        xInit = self.getInitPoints()
         batch_candidates, batch_acq_values = gen_candidates_scipy(
-            initial_conditions=Xinit,
+            initial_conditions=xInit,
             acquisition_function=self,
             lower_bounds=bounds[0],
             upper_bounds=bounds[1],
@@ -75,46 +76,58 @@ class BaseAquisition(MCAcquisitionFunction):
         return [batch_candidates[torch.argmax(batch_acq_values)], batch_acq_values]
 
     def optimizeSwarm(self):
-        xInit = self.getInitPoints()
-        pInit = copy.deepcopy(xInit)
-        vbounds = torch.tensor([0.5])
-        vInit = rand2n_torch(-vbounds.repeat(xInit.shape[1], 1), vbounds.repeat(
-            xInit.shape[1], 1), xInit.shape[0], xInit.shape[1])
-
-        self.points = xInit
-        res = self.forward(xInit)
-
-        fBest = res.max()
-        pBest = xInit[torch.argmax(res)]
         i = 0
-        while i < self.maxIter and not self.hasSafePoints(xInit):
-            xInit = self.getInitPoints()
+        # N Restarts if no safe set is found
+        while i == 0 or i < self.c.swarmopt_n_restarts and not self.hasSafePoints(x):
+            x = self.getInitPoints()
+            p = copy.deepcopy(x)
 
+            with torch.no_grad():
+                res = self.forward(x)
+
+            fBest = res.max()
+            pBest = x[torch.argmax(res)]
+
+            x = self.getInitPoints()
+            v = rand2n_torch(-np.abs(self.c.domain_end-self.c.domain_start),
+                             np.abs(self.c.domain_end-self.c.domain_start), self.c.set_size, self.c.dim_params)
             if i > 0:
                 print("[green][Info][/green] Did not find safe set at iteration {}.".format(i-1))
 
-            for j in range(100):
-                xInit += vInit
-                self.points = xInit
-                # TODO make better
-                xInit = clamp2dTensor(scale(xInit, self.c.domain_end-self.c.domain_start), 0,
-                                      1) if self.c.normalize_data else clamp2dTensor(xInit, self.c.domain_start, self.c.domain_end)
+            inertia_scale = self.c.swarmopt_w
 
-                resTmp = self.forward(xInit).detach()
+            # Swarmopt
+            for j in range(self.c.swarmopt_n_iterations):
+                # Update swarm velocities
+                r_p = rand2n_torch(torch.tensor([0]).repeat(self.c.dim_params), torch.tensor(
+                    [1]).repeat(self.c.dim_params), self.c.set_size, self.c.dim_params)
+                r_g = rand2n_torch(torch.tensor([0]).repeat(self.c.dim_params), torch.tensor(
+                    [1]).repeat(self.c.dim_params), self.c.set_size, self.c.dim_params)
+                v = inertia_scale*v  \
+                    + self.c.swarmopt_p*r_p * (p-x) + self.c.swarmopt_g*r_g*(pBest-x)
+                inertia_scale *= 0.95
+                
+                # Update swarm position
+                x += v
+                x = clamp2dTensor(scale(x, self.c.domain_end-self.c.domain_start), 0,
+                                  1) if self.c.normalize_data else clamp2dTensor(x, self.c.domain_start, self.c.domain_end)
+
+                with torch.no_grad():
+                    resTmp = self.forward(x)
 
                 mask = resTmp > res
-
+                p[mask] = x[mask]
                 res[mask] = resTmp[mask]
 
-                pInit[mask] = xInit[mask]
+                if res.max() > fBest:
+                    fBest = res.max()
+                    pBest = x[torch.argmax(res)]
 
-                vInit = rand2n_torch(-vbounds.repeat(xInit.shape[1], 1), vbounds.repeat(
-                    xInit.shape[1], 1), xInit.shape[0], xInit.shape[1])
-
+            # print(torch.count_nonzero(x <0))
 
             i += 1
 
-        if not self.hasSafePoints(xInit):
+        if not self.hasSafePoints(x):
             print("[yellow][Warning][/yellow] Could not find safe set")
         fBest = res.max()
 
@@ -147,5 +160,5 @@ class BaseAquisition(MCAcquisitionFunction):
             if self.model.models[0].train_inputs[0].shape[0] - self.n_double != self.model.models[0].train_inputs[0].unique(dim=0).shape[0]:
                 print("[yellow][Warning][/yellow] Already sampled {}".format(nextX))
                 self.n_double += 1
-        print("nextX: {}".format(nextX)) #scale(nextX, self.c.domain_end-self.c.domain_start), 
-        return [nextX, loss]
+        print("nextX: {}".format(nextX))  # scale(nextX, self.c.domain_end-self.c.domain_start),
+        return [nextX.detach(), loss.detach()]

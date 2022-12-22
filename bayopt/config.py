@@ -10,9 +10,16 @@ class Config:
         self.scale_beta = self.config.getfloat("Optimization", "scale_beta")
         self.domain_start = np.fromstring(self.config.get("Optimization", "domain_start"), sep=',')
         self.domain_end = np.fromstring(self.config.get("Optimization", "domain_end"), sep=',')
-        self.init_lenghtscale = np.fromstring(self.config.get("Optimization","init_lenghtscale"), sep=',')
+        self.init_lenghtscale = np.fromstring(self.config.get(
+            "Optimization", "init_lenghtscale"), sep=',')
         self.init_variance = self.config.getfloat("Optimization", "init_variance")
         self.normalize_data = self.config.getboolean("Optimization", "normalize_data")
+        self.swarmopt_n_restarts = self.config.getint("Optimization", "swarmopt_n_restarts")
+        self.swarmopt_n_iterations = self.config.getint(
+            "Optimization", "swarmopt_n_iterations")
+        self.swarmopt_p = self.config.getfloat("Optimization", "swarmopt_p")
+        self.swarmopt_g = self.config.getfloat("Optimization", "swarmopt_g")
+        self.swarmopt_w = self.config.getfloat("Optimization", "swarmopt_w")
         self.beta = self.config.getfloat("Optimization", "beta")
         self.dim_obs = self.config.getint("Optimization", "dim_obs")
         self.dim_params = self.config.getint("Optimization", "dim_params")
