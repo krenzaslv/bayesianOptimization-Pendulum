@@ -43,11 +43,10 @@ class BaseAquisition(MCAcquisitionFunction):
                 requires_grad=False,
             )
         return t
-    # @t_batch_mode_transform()
 
     def forward(self, X):
         self.points = X
-        x = self.model.posterior(X)
+        x = self.model.posterior(self.points)
         return self.evaluate(x)
 
     def evaluate(self, x):
@@ -104,7 +103,7 @@ class BaseAquisition(MCAcquisitionFunction):
                 v = inertia_scale*v  \
                     + self.c.swarmopt_p*r_p * (p-x) + self.c.swarmopt_g*r_g*(pBest-x)
                 inertia_scale *= 0.95
-                
+
                 # Update swarm position
                 x += v
                 x = clamp2dTensor(x, self.c.domain_start, self.c.domain_end)
@@ -133,7 +132,8 @@ class BaseAquisition(MCAcquisitionFunction):
     def hasSafePoints(self, X):
         xTmp = self.model.posterior(X)
         l = xTmp.mean - torch.sqrt(self.c.beta*xTmp.variance)
-        S = torch.all(l[:, 1:] > 0, axis=1)
+        fmin = 0 
+        S = l[:, 1:] > fmin
         return torch.any(S)
 
     def getNextPoint(self):
@@ -148,14 +148,17 @@ class BaseAquisition(MCAcquisitionFunction):
 
         else:
             X = self.getInitPoints()
+            if not self.hasSafePoints(X):
+                print("[yellow][Warning][/yellow] Could not find safe set")
+
             self.points = X
             res = self.forward(X)
 
             nextX = X[torch.argmax(res)]
             loss = res.max()
 
-            if self.model.models[0].train_inputs[0].shape[0] - self.n_double != self.model.models[0].train_inputs[0].unique(dim=0).shape[0]:
-                print("[yellow][Warning][/yellow] Already sampled {}".format(nextX))
-                self.n_double += 1
+            # if self.model.models[0].train_inputs[0].shape[0] - self.n_double != self.model.models[0].train_inputs[0].unique(dim=0).shape[0]:
+            #     print("[yellow][Warning][/yellow] Already sampled {}".format(nextX))
+            #     self.n_double += 1
         print("nextX: {}".format(nextX))  # scale(nextX, self.c.domain_end-self.c.domain_start),
         return [nextX.detach(), loss.detach()]

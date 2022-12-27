@@ -57,10 +57,11 @@ class Trainer:
             if y_k[0] > yMin[0]:
                 yMin = y_k
                 print("[green][Info][/green] New minimum at Iteration: {},yMin:{} at {}".format(i, yMin, k))
-
-            # self.logger.log(
-            #     model, i - 1, safePoints.shape[0], X_bo, train_x[i, :],
-            #     train_y[i, :].detach(
-            #     ), loss_ucb.detach()
-            # )
+            
+            if i >= safePoints.shape[0]:
+                self.logger.log(
+                    gp, i - 1, safePoints.shape[0], X_bo, self.data.train_x[i, :],
+                    self.data.train_y[i, :].detach(
+                    ), loss_ucb.detach()
+                )
             loss.reset()

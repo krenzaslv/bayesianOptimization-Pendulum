@@ -18,7 +18,7 @@ domain_start=0,0,0,0,0,0,0,0
 domain_end=20,1,20,1,20,1,20,1
 
 ;Prior for the lenght scale of the Matern kernel
-init_lenghtscale = 0.5,0.1,0.5,0.1,0.5,0.1,0.5,0.1
+init_lenghtscale = 0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001
 
 ;Variance of likelihood
 init_variance = 0.0001 
@@ -26,10 +26,10 @@ init_variance = 0.0001
 ; Scale factor for beta 
 scale_beta = 0.2 
 ; beta for confidence bound
-beta = 1
+beta = 3
 
 ; Normalize Data
-normalize_data = False 
+normalize_data = True
 
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
 set_size = 10000

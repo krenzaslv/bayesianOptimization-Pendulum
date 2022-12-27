@@ -17,7 +17,6 @@ class Logger:
         self.c = config
 
     def log(self, model, i, offset, X_k, x_k, y_k, loss_aq):
-        model.eval()
         self.X_buffer.append(X_k)
         self.model_buffer.append(copy.deepcopy(model))
         self.x_k_buffer.append(x_k)

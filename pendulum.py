@@ -11,7 +11,7 @@ from bayopt.tools.file import clearFiles, makeGIF
 import matplotlib.pyplot as plt
 from bayopt.pendulum.losses import PendulumErrorWithConstraint, PendulumErrorWithConstraintRandomInit
 from bayopt.pendulum.config import Config as PendulumConfig
-from bayopt.models.GPModel import ExactMultiTaskGP
+from bayopt.models.GPModel import ExactMultiTaskGP, ExactGPModel
 from rich import print
 
 app = typer.Typer()
@@ -122,9 +122,9 @@ def train_gym(
     # Pendulum dependent dynamics and losses
     loss = PendulumErrorWithConstraintRandomInit(config_pendulum)
 
-    model = ExactMultiTaskGP
+    model = ExactGPModel 
 
-    x_safe = torch.tensor([[0, 0]])  # ,[0.5,0.5], [-0.5,-0.5], [-0.5,0.5],[0.5,-0.5]])
+    x_safe = torch.tensor([[0.0, 0.0]])  # ,[0.5,0.5], [-0.5,-0.5], [-0.5,0.5],[0.5,-0.5]])
     trainer = Trainer(config)
     trainer.train(loss, model, x_safe)
     trainer.logger.save(config.save_file)

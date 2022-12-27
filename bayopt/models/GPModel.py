@@ -30,11 +30,6 @@ class ExactMultiTaskGP(ModelListGP):
     def forward(self, x):
         return super(ModelListGP, self).forward(x)
 
-    # def eval(self):
-    #     for i in range(self.dim_loss):
-    #         self.models[i].eval()
-
-
 class ExactGPModel(SingleTaskGP):
     def __init__(self, config, data, state_dict = None):
         likelihood = gpytorch.likelihoods.GaussianLikelihood(
@@ -45,17 +40,10 @@ class ExactGPModel(SingleTaskGP):
         mean_module = gpytorch.means.ZeroMean()
         covar_module = gpytorch.kernels.MaternKernel(ard_num_dims=config.dim_params)
         covar_module.lengthscale = torch.from_numpy(config.init_lenghtscale)
-
-        super().__init__(data.get_scaled_train_x(), data.get_scaled_train_y(), likelihood, covar_module, mean_module)
+        super().__init__(data.train_x, data.train_y, likelihood, covar_module, mean_module)
 
         if state_dict:
             self.load_state_dict(state_dict)
-
-
-#     def forward(self, x):
-#         mean_x = self.mean_module(x)
-#         covar_x = self.covar_module(x)
-#         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
 
 class MLPMean(gpytorch.means.Mean):
