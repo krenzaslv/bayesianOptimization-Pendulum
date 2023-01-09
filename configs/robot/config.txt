@@ -18,21 +18,21 @@ domain_start=0,0,0,0,0,0,0,0
 domain_end=20,1,20,1,20,1,20,1
 
 ;Prior for the lenght scale of the Matern kernel
-init_lenghtscale = 0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001
+init_lenghtscale = 0.5,0.05,0.5,0.05,0.5,0.05,0.5,0.05
 
 ;Variance of likelihood
 init_variance = 0.0001 
 
 ; Scale factor for beta 
-scale_beta = 0.2 
+scale_beta = 0.2
 ; beta for confidence bound
-beta = 3
+beta = 3 
 
 ; Normalize Data
 normalize_data = True
 
 ; Size of the subset is ucb_set_n**2 if ucb_use_set is true
-set_size = 10000
+set_size = 5000
 
 ; Initialization of grid [random, uniform]
 set_init = random 
@@ -44,12 +44,15 @@ acf_optim = swarm
 swarmopt_n_restarts = 10
 
 ; Restarts for swarmopt
-swarmopt_n_iterations = 100
+swarmopt_n_iterations = 200
 
 ; Swarmopt cognitive and social coefficient 
-swarmopt_p = 1 
+swarmopt_p = 1
 swarmopt_g = 1 
-swarmopt_w = 0.9
+swarmopt_w = 0.9 
+
+[Logger]
+log_trajectory = False
 
 [Plotting]
 ; Number of linearly spaced samples for plotting

@@ -8,12 +8,14 @@ class SafeUCB(BaseAquisition):
         self.fmin = 0
         self.dim = dim
 
-    def evaluate(self, x):
-        ucb = (x.mean + self.c.scale_beta*torch.sqrt(self.c.beta*x.variance)).reshape(-1, self.dim)
-
+    def evaluate(self, X):
         # UPC-Safe
-        l = x.mean - self.c.scale_beta*torch.sqrt(self.c.beta*x.variance)
-        S = torch.any(l[:, 1:].le(self.fmin), axis=1)
+        mean = X.mean.reshape(-1, self.dim)
+        var = X.variance.reshape(-1, self.dim)
+        l = mean - self.c.scale_beta*torch.sqrt(self.c.beta*var)
+        ucb = (mean + self.c.scale_beta*torch.sqrt(self.c.beta*var)).reshape(-1, self.dim)
+
+        S = torch.all(l[:,1:] > self.fmin, axis=1)
 
         ucb[~S] = -1e10
         # self.init_points = self.init_points[S]

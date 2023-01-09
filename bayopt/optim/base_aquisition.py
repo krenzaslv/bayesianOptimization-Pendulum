@@ -56,11 +56,6 @@ class BaseAquisition(MCAcquisitionFunction):
         bounds = torch.zeros(2, self.c.dim_params)
         bounds[0, :] = torch.from_numpy(self.c.domain_start)
         bounds[1, :] = torch.from_numpy(self.c.domain_end)
-        # Xinit = gen_batch_initial_conditions(
-        # self, bounds, q=10000, num_restarts=1, raw_samples=1
-        # )
-        # Xinit.reshape(1000,-1)
-        # print(Xinit.shape)
         xInit = self.getInitPoints()
         batch_candidates, batch_acq_values = gen_candidates_scipy(
             initial_conditions=xInit,
@@ -68,8 +63,6 @@ class BaseAquisition(MCAcquisitionFunction):
             lower_bounds=bounds[0],
             upper_bounds=bounds[1],
         )
-        # batch_candidates, batch_acq_values = optimize_acqf(self,bounds, 1, 1,raw_samples==) #, raw_samples=256)#
-
         return [batch_candidates[torch.argmax(batch_acq_values)], batch_acq_values]
 
     def optimizeSwarm(self):
@@ -87,21 +80,22 @@ class BaseAquisition(MCAcquisitionFunction):
 
             x = self.getInitPoints()
             v = rand2n_torch(-np.abs(self.c.domain_end-self.c.domain_start),
-                             np.abs(self.c.domain_end-self.c.domain_start), self.c.set_size, self.c.dim_params)
+                             np.abs(self.c.domain_end-self.c.domain_start), self.c.set_size, self.c.dim_params)/10
+
             if i > 0:
                 print("[green][Info][/green] Did not find safe set at iteration {}.".format(i-1))
 
             inertia_scale = self.c.swarmopt_w
 
             # Swarmopt
-            for j in range(self.c.swarmopt_n_iterations):
+            for _ in range(self.c.swarmopt_n_iterations):
                 # Update swarm velocities
                 r_p = rand2n_torch(torch.tensor([0]).repeat(self.c.dim_params), torch.tensor(
                     [1]).repeat(self.c.dim_params), self.c.set_size, self.c.dim_params)
                 r_g = rand2n_torch(torch.tensor([0]).repeat(self.c.dim_params), torch.tensor(
                     [1]).repeat(self.c.dim_params), self.c.set_size, self.c.dim_params)
                 v = inertia_scale*v  \
-                    + self.c.swarmopt_p*r_p * (p-x) + self.c.swarmopt_g*r_g*(pBest-x)
+                    + self.c.swarmopt_p *r_p* (p-x) + self.c.swarmopt_g*r_g*(pBest-x)
                 inertia_scale *= 0.95
 
                 # Update swarm position
@@ -118,9 +112,6 @@ class BaseAquisition(MCAcquisitionFunction):
                 if res.max() > fBest:
                     fBest = res.max()
                     pBest = x[torch.argmax(res)]
-
-            # print(torch.count_nonzero(x <0))
-
             i += 1
 
         if not self.hasSafePoints(x):

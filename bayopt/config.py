@@ -32,5 +32,7 @@ class Config:
 
         self.plotting_n_samples = self.config.getint("Plotting", "plotting_n_samples")
 
+        self.log_trajectory = self.config.getboolean("Logger", "log_trajectory")
+
         self.seed = self.config.getint("General", "seed")
         self.save_file = self.config.get("General", "save_file")

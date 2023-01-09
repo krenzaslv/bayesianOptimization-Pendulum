@@ -15,7 +15,6 @@ class GymPendulum(gymnasium.envs.classic_control.PendulumEnv):
         self.g = config.g
         self.m = config.m 
         self.l = config.L 
-
         self.render_mode = render_mode 
 
         self.screen_dim = 500

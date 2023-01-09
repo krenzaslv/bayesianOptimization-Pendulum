@@ -1,6 +1,8 @@
 from gymnasium.envs.classic_control.pendulum import PendulumEnv
 import numpy as np
 import math
+from gymnasium.wrappers import RecordVideo
+import time
 
 from bayopt.pendulum.GymPendulum import GymPendulum
 
@@ -23,8 +25,8 @@ def simulate_gym(config, dynamics, U, render=None):
 
     # Mess with gym torques
     envWrapper = GymPendulum(config, render_mode=render)
-
     observation, info = envWrapper.reset()
+
     angle = math.atan2(observation[1], observation[0])
     x_t = np.array([angle, observation[2]])
     for i in range(config.n_simulation):

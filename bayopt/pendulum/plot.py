@@ -33,8 +33,8 @@ class PlotPendulum:
         self.ax3.clear()
         self.ax4.clear()
         self.ax5.clear()
-        self.ax.set_ylim(self.config.domain_start[0], self.config.domain_end[0])
-        self.ax.set_xlim(self.config.domain_start[1], self.config.domain_end[1])
+        self.ax.set_xlim(self.config.domain_start[0], self.config.domain_end[0])
+        self.ax.set_ylim(self.config.domain_start[1], self.config.domain_end[1])
         self.ax.set_ylabel("kp")
         self.ax.set_xlabel("kd")
         self.ax.set_zlabel("f(x)")
@@ -45,8 +45,11 @@ class PlotPendulum:
         self.ax4.set_ylabel("error")
         self.ax4.set_xlabel("t")
         self.ax3.set_ylim(-4, 4)
-        self.ax2.set_ylim(-4, 10)
-        self.ax3.set_ylim(-4, 4)
+        self.ax2.set_ylim(-3, 3)
+        self.ax3.set_ylim(-3, 9)
+        self.ax5.set_ylabel("kd")
+        self.ax5.set_xlabel("kp")
+        self.ax4.set_xlabel("t")
         self.ax5.set_xlim(self.config.domain_start[0], self.config.domain_end[0])
         self.ax5.set_ylim(self.config.domain_start[1], self.config.domain_end[1])
         # self.ax5.axis('equal')
@@ -215,13 +218,8 @@ class PlotPendulum:
         )
         self.ax4.plot(y_min_buffer)
 
-        self.ax2.plot(self.X_star[:, 0], color="red")
-        self.ax2.plot(
-            self.config_pendulum.pi * np.ones(self.X_star.shape[0]), color="red", label="ideal"
-        )
-        self.ax3.plot(
-            self.config_pendulum.pi * np.ones(self.X_star.shape[0]), color="red", label="ideal"
-        )
+        self.ax2.plot(self.X_star[:, 0], color="red", label="ideal")
+        self.ax3.plot(self.X_star[:, 1], color="red", label="ideal")
         self.ax2.legend()
         self.ax3.legend()
         plt.savefig("data/{0:0>3}.png".format(i))

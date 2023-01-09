@@ -2,7 +2,6 @@ import numpy as np
 import torch
 import pickle
 from bayopt.tools.summary_writer import SummaryWriter
-from bayopt.models.GPModel import ExactGPModel, ExactMultiTaskGP
 import copy
 
 class Logger:
@@ -16,9 +15,10 @@ class Logger:
         self.writer = SummaryWriter()
         self.c = config
 
-    def log(self, model, i, offset, X_k, x_k, y_k, loss_aq):
-        self.X_buffer.append(X_k)
-        self.model_buffer.append(copy.deepcopy(model))
+    def log(self, model, i, X_k, x_k, y_k, loss_aq):
+        if self.c.log_trajectory:
+            self.X_buffer.append(X_k)
+            self.model_buffer.append(copy.deepcopy(model))
         self.x_k_buffer.append(x_k)
         self.y_k_buffer.append(y_k if y_k.dim == 1 else y_k[0])
         self.loss_aq_buffer.append(loss_aq)
@@ -30,7 +30,7 @@ class Logger:
 
         self.writer.add_scalar("Loss/Aquisition", loss_aq, i)
         self.writer.add_scalar("Loss/yMin", self.y_min_buffer[i], i)
-        if i == self.c.n_opt_samples - 1 - offset:
+        if i == 0:
             self.writer.add_hparams(
                 {
                     "init_lenghtscale": torch.from_numpy(self.c.init_lenghtscale),

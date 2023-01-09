@@ -8,7 +8,9 @@ from bayopt.optim.safe_opt import SafeOpt
 from bayopt.tools.math import scale
 from bayopt.optim.safe_ucb import SafeUCB
 from bayopt.tools.data import Data
+from gpytorch.mlls.exact_marginal_log_likelihood import ExactMarginalLogLikelihood 
 from rich import print
+from botorch import fit_gpytorch_mll
 
 
 class Trainer:
@@ -20,9 +22,6 @@ class Trainer:
         self.data = Data(config)
 
     def train(self, loss, model, safePoints):
-        # train_x = torch.zeros(self.config.n_opt_samples +
-        #                       safePoints.shape[0], self.config.dim_params)
-        # train_y = torch.zeros(self.config.n_opt_samples + safePoints.shape[0], loss.dim)
         k = np.zeros(self.config.dim_params)
 
         yMin = -1e10*np.ones(loss.dim)  # Something small
@@ -40,15 +39,17 @@ class Trainer:
                 aquisition = UCB
 
             if i < safePoints.shape[0]:
-                [k, loss_ucb] = [safePoints[i], torch.tensor([0])]
+                [k, acf_val] = [safePoints[i], torch.tensor([0])]
+                [x_k, y_k, X_bo] = loss.evaluate(k)
+                self.data.append_data(k.reshape(1,-1), y_k.reshape(1, -1))
+                gp = model(self.config, self.data, state_dict)
             else:
                 gp = model(self.config, self.data, state_dict)
                 aquisition = aquisition(gp, self.data, self.config, loss.dim)
-                [k, loss_ucb] = aquisition.getNextPoint()
+                [k, acf_val] = aquisition.getNextPoint()
 
-            # 3. Evaluate new k
-            [x_k, y_k, X_bo] = loss.evaluate(k)
-            self.data.append_data(x_k.reshape(1,-1), y_k.reshape(1, -1))
+                [x_k, y_k, X_bo] = loss.evaluate(k)
+                self.data.append_data(k.reshape(1,-1), y_k.reshape(1, -1))
 
             if torch.any(y_k[1:] < 0):
                 print(
@@ -58,10 +59,8 @@ class Trainer:
                 yMin = y_k
                 print("[green][Info][/green] New minimum at Iteration: {},yMin:{} at {}".format(i, yMin, k))
             
-            if i >= safePoints.shape[0]:
-                self.logger.log(
-                    gp, i - 1, safePoints.shape[0], X_bo, self.data.train_x[i, :],
-                    self.data.train_y[i, :].detach(
-                    ), loss_ucb.detach()
+            # if i >= safePoints.shape[0]:
+            self.logger.log(
+                gp, i, X_bo, x_k, y_k, acf_val
                 )
             loss.reset()

@@ -4,29 +4,29 @@ save_file = data.txt
 
 [Optimization]
  ; Number of Bayesian Optimization steps
-n_opt_samples = 50
+n_opt_samples = 100 
 
 ; Dimension of parameters
 dim_obs = 3
 dim_params = 2
 
 ;Aquisition must be one of [UCB, SafeUCB, SafeOpt]
-aquisition=SafeOpt
+aquisition=UCB
 
 ; Domain bounds for Bayesian optimization
-domain_start=0,0
-domain_end=10,10
+domain_start=-2,-1
+domain_end=2,1
 
 ;Prior for the lenght scale of the Matern kernel
-init_lenghtscale = 0.2,0.2
+init_lenghtscale = 0.2,0.1
 
 ;Variance of likelihood
 init_variance = 0.0001 
 
 ; Scale factor for beta 
-scale_beta = 0.3
+scale_beta = 1 
 ; beta for confidence bound
-beta = 0.2
+beta = 3
 
 ; Normalize Data
 normalize_data = False
@@ -34,7 +34,7 @@ normalize_data = False
 set_size = 200
 
 ; Initialization of grid [random, uniform]
-set_init = grid 
+set_init = uniform
 
 ; Aquisition optimizer [opt, swarm , none]
 acf_optim = none 
@@ -49,6 +49,9 @@ swarmopt_n_iterations = 100
 swarmopt_p = 1 
 swarmopt_g = 1 
 swarmopt_w = 0.9
+
+[Logger]
+log_trajectory = True
 
 [Plotting]
 ; Number of linearly spaced samples for plotting
